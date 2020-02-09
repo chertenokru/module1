@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &4317962630979521952
+--- !u!114 &5871530983796455381
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4022456353391589101}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cf2a655dbeb9014ba9402b3f7b1a1c7, type: 3}
+  m_Script: {fileID: 11500000, guid: 10562dcb1be11744cbd39d1a9603cba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1902203076000523734
@@ -19,10 +19,15 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 7134354862502786849, guid: 73e1432563d8c1a48839445fb70ed3d9,
+    - target: {fileID: 1094281214711457815, guid: 73e1432563d8c1a48839445fb70ed3d9,
         type: 3}
-      propertyPath: weapon
-      value: 1
+      propertyPath: weaponsType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1094281214711457815, guid: 73e1432563d8c1a48839445fb70ed3d9,
+        type: 3}
+      propertyPath: type
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8005653227702665060, guid: 73e1432563d8c1a48839445fb70ed3d9,
         type: 3}
@@ -103,6 +108,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TT_demo_zombie
       objectReference: {fileID: 0}
+    - target: {fileID: 100168, guid: f88c8301226fd194cbbc64e25b20d567, type: 3}
+      propertyPath: m_TagString
+      value: Hand
+      objectReference: {fileID: 0}
     - target: {fileID: 400166, guid: f88c8301226fd194cbbc64e25b20d567, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -150,7 +159,7 @@ PrefabInstance:
     - target: {fileID: 9500000, guid: f88c8301226fd194cbbc64e25b20d567, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 31e3044f971f64b4ea948e989a450218, type: 2}
+      objectReference: {fileID: 9100000, guid: 6522a83cffce04a4c9be707ce7cf9477, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f88c8301226fd194cbbc64e25b20d567, type: 3}
 --- !u!1 &4022456353391589101 stripped

@@ -1,24 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CharacterAnimationEvents : MonoBehaviour
 {
-    Character character;
+    private Character character;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         character = GetComponentInParent<Character>();
     }
 
-    void AttackEnd()
+    private void AttackEnd()
     {
-        character.SetState(Character.State.RunningFromEnemy);
+        character.SetState(Character.State.Attack);
+    }
+    private void ShotEnd()
+    {
+        character.SetState(Character.State.Shot);
+    }
+    
+    private void AttackArmEnd()
+    {
+        character.SetState(Character.State.Attack);
     }
 
-    void ShootEnd()
-    {
-        character.SetState(Character.State.Idle);
-    }
 }
