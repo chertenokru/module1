@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections;
+
 using UnityEngine;
+
 
 public class Character : MonoBehaviour
 {
+    
+    //    private const int AnimatorFieldSpeed = Animator.StringToHash("speed");
     public enum State
     {
         Idle,
@@ -15,6 +19,7 @@ public class Character : MonoBehaviour
         Shot,
         Dead
     }
+  
 
     public enum CharacterType
     {
@@ -29,6 +34,7 @@ public class Character : MonoBehaviour
     private const string AnimatorAttackArm = "attack arm";
     private const string AnimatorShot = "shot";
     private const string AnimatorDead = "dead";
+    
     private const string TagWeaponHand = "Hand";
     private State state;
 
@@ -42,6 +48,8 @@ public class Character : MonoBehaviour
     private Character targetCharacter;
     private WeaponsController weaponsController;
     private GameObject weaponHand;
+    private HealthBar healthBar;
+    
     private int weapontDamage = 1;
 
 
@@ -49,6 +57,7 @@ public class Character : MonoBehaviour
     public float runSpeed = 0.05f;
     public float distanceFromEnemy = 1.2f;
     public int health = 4;
+    public int maxHealth = 4;
 
     public Transform Target
     {
@@ -58,6 +67,7 @@ public class Character : MonoBehaviour
 
     public Weapons.WeaponsType WeaponsType
     {
+        
         get => weaponsType;
         set => SetWeapon(value);
     }
@@ -66,16 +76,21 @@ public class Character : MonoBehaviour
     private void Awake()
     {
         InitWeaponCharacter();
+        
+        healthBar = GetComponentInChildren<HealthBar>();
+        healthBar.SetMaxHealth(maxHealth);
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
+        
         state = State.Idle;
         startPosition = transform.position;
         startRotation = transform.rotation;
         animator = GetComponentInChildren<Animator>();
+        SetHealth(health);
         if (target == null) AutoSelectTarget();
         SetTarget(target);
         SetWeapon(weaponsType);
@@ -170,12 +185,11 @@ public class Character : MonoBehaviour
     public bool SetDamage(int damage)
     {
         if (state == State.Dead) return true;
-
-        health -= damage;
+        SetHealth(health-damage);
         print(name + " get damage - " + damage);
         if (health <= 0)
         {
-            health = 0;
+            SetHealth(0);
             SetState(State.Idle);
             SetState(State.Dead);
             print(name + " is dead !");
@@ -183,6 +197,12 @@ public class Character : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void SetHealth(int newHealth)
+    {
+        health = newHealth;
+        healthBar.SetHealth(health);
     }
 
 
@@ -254,6 +274,7 @@ public class Character : MonoBehaviour
 
             case State.Dead:
                 animator.SetTrigger(AnimatorDead);
+                
                 break;
         }
     }
