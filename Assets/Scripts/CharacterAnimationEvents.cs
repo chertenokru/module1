@@ -9,18 +9,23 @@ public class CharacterAnimationEvents : MonoBehaviour
         character = GetComponentInParent<Character>();
     }
 
-    private void AttackEnd()
-    {
-        character.SetState(Character.State.Attack);
-    }
-    private void ShotEnd()
-    {
-        character.SetState(Character.State.Shot);
-    }
-    
-    private void AttackArmEnd()
+    private void AttackEndEvent()
     {
         character.SetState(Character.State.Attack);
     }
 
+    private void ShotEndEvent()
+    {
+        character.SetState(Character.State.Shot);
+    }
+
+    private void AttackArmEndEvent()
+    {
+        character.SetState(Character.State.Attack);
+    }
+
+    private void SetDamageEvent()
+    {
+        character.SetDamageEvent();
+    }
 }

@@ -1556,6 +1556,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 850870333308742736, guid: ec4b6a0b6924a2e419f93c7a483c42f1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1646117547966535205, guid: ec4b6a0b6924a2e419f93c7a483c42f1,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -2129,6 +2134,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1033907960}
     m_Modifications:
+    - target: {fileID: 1534128134568857025, guid: 2d3bdd141f8b8244e8db7b0ee8540ba3,
+        type: 3}
+      propertyPath: weaponsType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2680098533220525719, guid: 2d3bdd141f8b8244e8db7b0ee8540ba3,
         type: 3}
       propertyPath: m_AnchorMax.x

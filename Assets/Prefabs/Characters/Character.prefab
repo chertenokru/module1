@@ -178,6 +178,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4453161890611786027, guid: 9c91b4a138678374f983a09b8def9413,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: -0.02650469
+      objectReference: {fileID: 0}
     - target: {fileID: 6118151795017566292, guid: 9c91b4a138678374f983a09b8def9413,
         type: 3}
       propertyPath: m_AnchoredPosition.x

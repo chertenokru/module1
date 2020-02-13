@@ -147,7 +147,6 @@ public class Character : MonoBehaviour
             case State.Attack:
                 if (targetCharacter != null)
                 {
-                    if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();
                     SetState(State.RunningFromEnemy);
                 }
 
@@ -155,7 +154,6 @@ public class Character : MonoBehaviour
             case State.Shot:
                 if (targetCharacter != null)
                 {
-                    if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();
                     RotateToTarget(startRotation.eulerAngles);
                 }
 
@@ -273,6 +271,7 @@ public class Character : MonoBehaviour
                 break;
 
             case State.Dead:
+                healthBar.gameObject.SetActive(false);
                 animator.SetTrigger(AnimatorDead);
                 
                 break;
@@ -448,5 +447,10 @@ public class Character : MonoBehaviour
         }
 
         yield break;
+    }
+
+    public void SetDamageEvent()
+    {
+        if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();        
     }
 }
