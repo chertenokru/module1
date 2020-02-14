@@ -92,7 +92,7 @@ public class Character : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         SetHealth(health);
         if (target == null) AutoSelectTarget();
-        SetTarget(target);
+        else  SetTarget(target);
         SetWeapon(weaponsType);
     }
 
@@ -235,14 +235,17 @@ public class Character : MonoBehaviour
         {
             case State.Idle:
                 animator.SetFloat(AnimatorFieldSpeed, 0.0f);
+                print($"{name} set anim - {AnimatorFieldSpeed} 0");
                 break;
             case State.RunningToEnemy:
                 startPosition = transform.position;
                 startRotation = transform.rotation;
                 animator.SetFloat(AnimatorFieldSpeed, runSpeed);
+                print($"{name} set anim - {AnimatorFieldSpeed} {runSpeed}");
                 break;
             case State.RunningFromEnemy:
                 animator.SetFloat(AnimatorFieldSpeed, runSpeed);
+                print($"{name} set anim - {AnimatorFieldSpeed} {runSpeed}");
                 break;
             case State.BeginAttack:
                 if (targetCharacter.state == State.Dead)
@@ -253,9 +256,17 @@ public class Character : MonoBehaviour
                     }
 
                 if (weaponsType == Weapons.WeaponsType.Bat)
+                {
                     animator.SetTrigger(AnimatorAttack);
+                    print($"{name} set triger - {AnimatorAttack} ");
+                }
+
                 if (weaponsType == Weapons.WeaponsType.None)
+                {
                     animator.SetTrigger(AnimatorAttackArm);
+                    print($"{name} set triger - {AnimatorAttackArm} ");
+                }
+
                 break;
             case State.BeginShot:
                 if (targetCharacter.state == State.Dead)
@@ -268,11 +279,14 @@ public class Character : MonoBehaviour
                 startRotation = transform.rotation;
                 RotateToTarget(target.position);
                 animator.SetTrigger(AnimatorShot);
+                print($"{name} set triger - {AnimatorShot} ");
+                
                 break;
 
             case State.Dead:
                 healthBar.gameObject.SetActive(false);
                 animator.SetTrigger(AnimatorDead);
+                print($"{name} set triger - {AnimatorDead} ");
                 
                 break;
         }
