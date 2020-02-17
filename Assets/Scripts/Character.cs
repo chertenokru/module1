@@ -154,7 +154,7 @@ public class Character : MonoBehaviour
             case State.Shot:
                 if (targetCharacter != null)
                 {
-                    RotateToTarget(startRotation.eulerAngles);
+                    transform.rotation = startRotation;
                 }
 
                 SetState(State.Idle);
@@ -228,6 +228,7 @@ public class Character : MonoBehaviour
 
     public void SetState(State newState)
     {
+        print($"{name} - {newState}");
         if (state == newState) return;
         state = newState;
         //animator setting    
@@ -465,6 +466,7 @@ public class Character : MonoBehaviour
 
     public void SetDamageEvent()
     {
+        // наносим удар и если враг мёртв, то ищем следующего
         if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();        
     }
 }
