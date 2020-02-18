@@ -38,12 +38,12 @@ public class UIPauseMenuScript : MonoBehaviour
     {
         buttonPause.gameObject.SetActive(false);
         pauseMenu.SetActive(true);
-        Time.timeScale = 0;
+        Time.timeScale = 0.00000000000001f;
     }
 
     public void loadMenu()
     {
-        sceneLoadingLogic.LoadScene(0);
+        sceneLoadingLogic.LoadScene(SceneLoadingLogic.SceneNums.Menu);
     }
 
     public void resetLevel()

@@ -10,20 +10,22 @@ public class UIMenuScript : MonoBehaviour
     public Button playLevel1Button;
     public Button playLevel2Button;
     public Button exitButton;
-    private SceneLoadingLogic sceneLoadingLogic; 
+    private SceneLoadingLogic sceneLoadingLogic;
 
     private void Awake()
     {
         playLevel1Button.onClick.AddListener(LoadLeve1);
         playLevel2Button.onClick.AddListener(LoadLevel2);
         exitButton.onClick.AddListener(GameExit);
-          var p =  FindObjectsOfType<SceneLoadingLogic>();
-          sceneLoadingLogic = p[p.Length-1];
+        // залипуха, если вдруг оказалось несколько компонентов, то ищем последний созданный
+        // ибо первый загрузил сцену и сейчас сдохнет
+        var p = FindObjectsOfType<SceneLoadingLogic>();
+        sceneLoadingLogic = p[p.Length - 1];
     }
 
     public void LoadLevel2()
     {
-        sceneLoadingLogic.LoadScene(2);
+        sceneLoadingLogic.LoadScene(SceneLoadingLogic.SceneNums.Level2);
     }
 
     public void GameExit()
@@ -33,8 +35,6 @@ public class UIMenuScript : MonoBehaviour
 
     public void LoadLeve1()
     {
-        sceneLoadingLogic.LoadScene(1);
+        sceneLoadingLogic.LoadScene(SceneLoadingLogic.SceneNums.Level1);
     }
-
-
 }

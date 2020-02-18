@@ -28,5 +28,4 @@ public class WeaponsController : MonoBehaviour
 
         return null;
     }
-    
 }

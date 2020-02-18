@@ -11,25 +11,25 @@ public class CharacterAnimationEvents : MonoBehaviour
 
     private void AttackEndEvent()
     {
+        // завершить атаку
         character.SetState(Character.State.Attack);
-        print($"{character.name} get event - AttackEndEvent ");
     }
 
     private void ShotEndEvent()
     {
+        // завершить атаку
         character.SetState(Character.State.Shot);
-        print($"{character.name} get event - ShotEndEvent ");
     }
 
     private void AttackArmEndEvent()
     {
+        // завершить атаку
         character.SetState(Character.State.Attack);
-        print($"{character.name} get event - AttackArmEndEvent ");
     }
 
     private void SetDamageEvent()
     {
+        // пора нанести урон посреди атаки
         character.SetDamageEvent();
-        print($"{character.name} get event - SetDamageEvent ");
     }
 }

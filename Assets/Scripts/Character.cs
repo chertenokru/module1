@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
-using UnityEditor.Animations;
+using UnityEditorInternal;
 using UnityEngine;
+using AnimatorController = UnityEditor.Animations.AnimatorController;
 
 
 public class Character : MonoBehaviour
 {
-    //    private const int AnimatorFieldSpeed = Animator.StringToHash("speed");
     public enum State
     {
         Idle,
@@ -33,10 +33,12 @@ public class Character : MonoBehaviour
     private const string AnimatorAttackArm = "attack arm";
     private const string AnimatorShot = "shot";
     private const string AnimatorDead = "dead";
-
     private const string TagWeaponHand = "Hand";
-    private State state;
+    private bool isWarMode = false;
 
+    private State state;
+    // переделать на id - придумать как хранить
+    // private const int AnimatorFieldSpeed = Animator.StringToHash("speed");
 
     [SerializeField] private Transform target;
     [SerializeField] private Weapons.WeaponsType weaponsType = Weapons.WeaponsType.None;
@@ -47,16 +49,21 @@ public class Character : MonoBehaviour
     private Character targetCharacter;
     private WeaponsController weaponsController;
     private GameObject weaponHand;
+
     private HealthBar healthBar;
 
+    // подставляется из оружия
     private int weapontDamage = 1;
 
 
-    public CharacterType type;
+    public CharacterType type = CharacterType.None;
     public float runSpeed = 0.05f;
     public float distanceFromEnemy = 1.2f;
     public int health = 4;
+
     public int maxHealth = 4;
+
+    // залипуха временная
     public AnimatorController danceAnimatorController;
 
     public Transform Target
@@ -74,8 +81,8 @@ public class Character : MonoBehaviour
 
     private void Awake()
     {
+        // подставляем нужное оружие в модель
         InitWeaponCharacter();
-
         healthBar = GetComponentInChildren<HealthBar>();
         animator = GetComponentInChildren<Animator>();
     }
@@ -86,15 +93,17 @@ public class Character : MonoBehaviour
     {
         healthBar.SetMaxHealth(maxHealth);
         state = State.Idle;
+
         startPosition = transform.position;
         startRotation = transform.rotation;
-        
+
         SetHealth(health);
         if (target == null) AutoSelectTarget();
         else SetTarget(target);
         SetWeapon(weaponsType);
     }
 
+    // ищет случайную цель
     private bool AutoSelectTarget()
     {
         Character temp;
@@ -121,9 +130,9 @@ public class Character : MonoBehaviour
     }
 
 
-    // Update is called once per frame
     void FixedUpdate()
     {
+        // статусы кроме анимации
         switch (state)
         {
             case State.Idle:
@@ -161,6 +170,7 @@ public class Character : MonoBehaviour
         }
     }
 
+    /// подменяет mesh оружия и заменяет ущерб  
     private void SetWeapon(Weapons.WeaponsType value)
     {
         weaponsType = value;
@@ -173,23 +183,23 @@ public class Character : MonoBehaviour
         if (mesh != null)
         {
             GameObject obj = Instantiate(mesh, weaponHand.transform);
-            //obj.transform.parent = weaponHand.transform;
         }
 
         weapontDamage = weaponsController.GetDamage(weaponsType);
     }
 
+    // наночит урон и если труп то возвращает да
     public bool SetDamage(int damage)
     {
         if (state == State.Dead) return true;
         SetHealth(health - damage);
-        print(name + " get damage - " + damage);
+        //print(name + " get damage - " + damage);
         if (health <= 0)
         {
             SetHealth(0);
             SetState(State.Idle);
             SetState(State.Dead);
-            print(name + " is dead !");
+            //print(name + " is dead !");
             return true;
         }
 
@@ -203,6 +213,7 @@ public class Character : MonoBehaviour
     }
 
 
+    // устанавливает цель, принимает Character 
     public bool SetTarget(Character newTargetCharacter)
     {
         if (newTargetCharacter == null)
@@ -210,24 +221,25 @@ public class Character : MonoBehaviour
         else return SetTarget(newTargetCharacter.transform);
     }
 
+    // устанавливает цель, принимает transform
     public bool SetTarget(Transform newTargetTransform)
     {
         if (newTargetTransform == null)
         {
-            print($"{name} reported - target not found! ");
+            //  print($"{name} reported - target not found! ");
             return false;
         }
 
-        //if (state != State.Idle) return false;
         target = newTargetTransform;
         targetCharacter = target.gameObject.GetComponent<Character>();
-        print($"{name} set as target - {target.name}");
+        //print($"{name} set as target - {target.name}");
         return true;
     }
 
+    // установка статусов
     public void SetState(State newState)
     {
-        print($"{name} - {newState}");
+        //print($"{name} - {newState}");
         if (state == newState) return;
         state = newState;
         //animator setting    
@@ -235,17 +247,14 @@ public class Character : MonoBehaviour
         {
             case State.Idle:
                 animator.SetFloat(AnimatorFieldSpeed, 0.0f);
-                print($"{name} set anim - {AnimatorFieldSpeed} 0");
                 break;
             case State.RunningToEnemy:
                 startPosition = transform.position;
                 startRotation = transform.rotation;
                 animator.SetFloat(AnimatorFieldSpeed, runSpeed);
-                print($"{name} set anim - {AnimatorFieldSpeed} {runSpeed}");
                 break;
             case State.RunningFromEnemy:
                 animator.SetFloat(AnimatorFieldSpeed, runSpeed);
-                print($"{name} set anim - {AnimatorFieldSpeed} {runSpeed}");
                 break;
             case State.BeginAttack:
                 if (targetCharacter.state == State.Dead)
@@ -258,13 +267,11 @@ public class Character : MonoBehaviour
                 if (weaponsType == Weapons.WeaponsType.Bat)
                 {
                     animator.SetTrigger(AnimatorAttack);
-                    print($"{name} set triger - {AnimatorAttack} ");
                 }
 
                 if (weaponsType == Weapons.WeaponsType.None)
                 {
                     animator.SetTrigger(AnimatorAttackArm);
-                    print($"{name} set triger - {AnimatorAttackArm} ");
                 }
 
                 break;
@@ -279,15 +286,11 @@ public class Character : MonoBehaviour
                 startRotation = transform.rotation;
                 RotateToTarget(target.position);
                 animator.SetTrigger(AnimatorShot);
-                print($"{name} set triger - {AnimatorShot} ");
-
                 break;
 
             case State.Dead:
                 healthBar.gameObject.SetActive(false);
                 animator.SetTrigger(AnimatorDead);
-                print($"{name} set triger - {AnimatorDead} ");
-
                 break;
         }
     }
@@ -301,7 +304,6 @@ public class Character : MonoBehaviour
 
     public bool RunToTowards(Vector3 targetPosition, float distanceFromTarget)
     {
-        // print($"{distanceFromTarget}");
         Vector3 selfPosition = transform.position;
         // считаем  вектор до цели
         Vector3 distance = targetPosition - selfPosition;
@@ -328,6 +330,7 @@ public class Character : MonoBehaviour
         return true;
     }
 
+    // поиск цели по типу, если находит, то возвращает цель
     private Character SearchTarget(CharacterType type)
     {
         Character[] chars = GameObject.FindObjectsOfType<Character>();
@@ -347,13 +350,14 @@ public class Character : MonoBehaviour
         return null;
     }
 
-
+    //Начальная настройка оружия 
     private void InitWeaponCharacter()
     {
+        // контроллер оружия
         weaponsController = FindObjectOfType<WeaponsController>();
         if (weaponsController == null)
             throw new ApplicationException("Не найден нужный класс WeaponsController");
-
+        // ищем руку для оружия, по метке
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
             if (child.gameObject.CompareTag(TagWeaponHand))
@@ -375,7 +379,6 @@ public class Character : MonoBehaviour
 
         if (target == null)
         {
-            print($"{name} не задана цель!");
             return;
         }
 
@@ -439,9 +442,11 @@ public class Character : MonoBehaviour
         StartCoroutine(War());
     }
 
+    //все против всех
     public IEnumerator War()
     {
-        Character[] listChar = GameObject.FindObjectsOfType<Character>();
+        isWarMode = true;
+        Character[] listChar = FindObjectsOfType<Character>();
         var countLife = listChar.Length;
 
         while (countLife > 1)
@@ -459,19 +464,29 @@ public class Character : MonoBehaviour
                 if (character.state != State.Dead) countLife++;
             }
         }
-
-        yield break;
     }
 
+    // вызывается тригером анимации в момент урона, анимация играется дальше
+    //  а программа наносит урон
     public void SetDamageEvent()
     {
         // наносим удар и если враг мёртв, то ищем следующего
         if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();
-        if (targetCharacter.state == State.Dead)
+        // все здохли! а теперь - танцы !
+        if (isWarMode && targetCharacter.state == State.Dead)
         {
             animator.avatar = null;
             animator.runtimeAnimatorController = danceAnimatorController;
-           
         }
+    }
+
+    public bool IsDead()
+    {
+        return state == State.Dead;
+    }
+
+    public bool IsIdle()
+    {
+        return state == State.Idle;
     }
 }

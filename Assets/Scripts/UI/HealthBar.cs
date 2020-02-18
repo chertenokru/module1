@@ -12,8 +12,7 @@ public class HealthBar : MonoBehaviour
     private Image fill;
     private Slider slider;
     private TextMeshProUGUI text;
-    
-    
+
 
     private void Awake()
     {
@@ -28,7 +27,6 @@ public class HealthBar : MonoBehaviour
         slider.value = health;
         fill.color = gradient.Evaluate(1f);
         text.SetText($"{slider.value}/{slider.maxValue}");
-        
     }
 
     public void SetHealth(int health)
