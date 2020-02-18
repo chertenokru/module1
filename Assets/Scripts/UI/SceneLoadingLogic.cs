@@ -10,16 +10,17 @@ public class SceneLoadingLogic : MonoBehaviour
 {
     public Slider progressBarSlider;
     public GameObject visualPart;
-    public GameObject hidePart;
     public TextMeshProUGUI loadingMessages;
     public float fakeLoadTime = 1f;
     public string[] text;
+    private GameObject hidePart;
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-        progressBarSlider.gameObject.SetActive(false);
-        hidePart.SetActive(true);
+        DontDestroyOnLoad(transform.parent);
+        hidePart = GameObject.FindGameObjectWithTag("HideUIOnLoad");
+     
+        visualPart.SetActive(false);
     }
 
     public void LoadScene(string sceneName)
@@ -34,13 +35,14 @@ public class SceneLoadingLogic : MonoBehaviour
     private IEnumerator LoadGameSceneCor(int sceneNo)
     {
         
-        progressBarSlider.gameObject.SetActive(true);
+        visualPart.SetActive(true);
         hidePart.SetActive(false);
         AsyncOperation asyncLoading = SceneManager.LoadSceneAsync(sceneNo);
         asyncLoading.allowSceneActivation = false;
         loadingMessages.text = text[0];
 
         float timer = 0;
+        float startTime = Time.realtimeSinceStartup; 
         int i = 1;
 
         while (timer < fakeLoadTime || asyncLoading.progress < 0.9f)
@@ -55,21 +57,31 @@ public class SceneLoadingLogic : MonoBehaviour
                 }
             }
 
-            timer += Time.deltaTime;
+            timer += (Time.realtimeSinceStartup - startTime);
             SetProgressBarProgress(timer / fakeLoadTime);
 
             yield return null;
         }
 
         asyncLoading.allowSceneActivation = true;
-
+        
         while (!asyncLoading.isDone)
             yield return null;
         visualPart.SetActive(false);
+        hidePart = GameObject.FindGameObjectWithTag("HideUIOnLoad");
+        Time.timeScale = 1;
+        if (sceneNo == 0)
+            Destroy(transform.parent.gameObject);
+
     }
 
     private void SetProgressBarProgress(float progress)
     {
         progressBarSlider.value = progress;
+    }
+
+    public void ReloadCurrentScene()
+    {
+        LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

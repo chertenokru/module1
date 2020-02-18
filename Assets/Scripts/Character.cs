@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections;
-
+using UnityEditor.Animations;
 using UnityEngine;
 
 
 public class Character : MonoBehaviour
 {
-    
     //    private const int AnimatorFieldSpeed = Animator.StringToHash("speed");
     public enum State
     {
@@ -19,7 +18,7 @@ public class Character : MonoBehaviour
         Shot,
         Dead
     }
-  
+
 
     public enum CharacterType
     {
@@ -34,7 +33,7 @@ public class Character : MonoBehaviour
     private const string AnimatorAttackArm = "attack arm";
     private const string AnimatorShot = "shot";
     private const string AnimatorDead = "dead";
-    
+
     private const string TagWeaponHand = "Hand";
     private State state;
 
@@ -49,7 +48,7 @@ public class Character : MonoBehaviour
     private WeaponsController weaponsController;
     private GameObject weaponHand;
     private HealthBar healthBar;
-    
+
     private int weapontDamage = 1;
 
 
@@ -58,6 +57,7 @@ public class Character : MonoBehaviour
     public float distanceFromEnemy = 1.2f;
     public int health = 4;
     public int maxHealth = 4;
+    public AnimatorController danceAnimatorController;
 
     public Transform Target
     {
@@ -67,7 +67,6 @@ public class Character : MonoBehaviour
 
     public Weapons.WeaponsType WeaponsType
     {
-        
         get => weaponsType;
         set => SetWeapon(value);
     }
@@ -76,23 +75,23 @@ public class Character : MonoBehaviour
     private void Awake()
     {
         InitWeaponCharacter();
-        
+
         healthBar = GetComponentInChildren<HealthBar>();
-        healthBar.SetMaxHealth(maxHealth);
+        animator = GetComponentInChildren<Animator>();
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        healthBar.SetMaxHealth(maxHealth);
         state = State.Idle;
         startPosition = transform.position;
         startRotation = transform.rotation;
-        animator = GetComponentInChildren<Animator>();
+        
         SetHealth(health);
         if (target == null) AutoSelectTarget();
-        else  SetTarget(target);
+        else SetTarget(target);
         SetWeapon(weaponsType);
     }
 
@@ -183,7 +182,7 @@ public class Character : MonoBehaviour
     public bool SetDamage(int damage)
     {
         if (state == State.Dead) return true;
-        SetHealth(health-damage);
+        SetHealth(health - damage);
         print(name + " get damage - " + damage);
         if (health <= 0)
         {
@@ -281,14 +280,14 @@ public class Character : MonoBehaviour
                 RotateToTarget(target.position);
                 animator.SetTrigger(AnimatorShot);
                 print($"{name} set triger - {AnimatorShot} ");
-                
+
                 break;
 
             case State.Dead:
                 healthBar.gameObject.SetActive(false);
                 animator.SetTrigger(AnimatorDead);
                 print($"{name} set triger - {AnimatorDead} ");
-                
+
                 break;
         }
     }
@@ -455,9 +454,9 @@ public class Character : MonoBehaviour
                     character.Attack();
                     yield return new WaitForFixedUpdate();
                 }
+
                 yield return new WaitForFixedUpdate();
                 if (character.state != State.Dead) countLife++;
-                
             }
         }
 
@@ -467,6 +466,12 @@ public class Character : MonoBehaviour
     public void SetDamageEvent()
     {
         // наносим удар и если враг мёртв, то ищем следующего
-        if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();        
+        if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();
+        if (targetCharacter.state == State.Dead)
+        {
+            animator.avatar = null;
+            animator.runtimeAnimatorController = danceAnimatorController;
+           
+        }
     }
 }

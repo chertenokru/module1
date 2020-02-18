@@ -10,9 +10,6 @@ public class UIMenuScript : MonoBehaviour
     public Button playLevel1Button;
     public Button playLevel2Button;
     public Button exitButton;
-    public Scene scene1;
-    public Scene scene2;
-
     private SceneLoadingLogic sceneLoadingLogic; 
 
     private void Awake()
@@ -20,7 +17,8 @@ public class UIMenuScript : MonoBehaviour
         playLevel1Button.onClick.AddListener(LoadLeve1);
         playLevel2Button.onClick.AddListener(LoadLevel2);
         exitButton.onClick.AddListener(GameExit);
-        sceneLoadingLogic = GameObject.FindObjectOfType<SceneLoadingLogic>();
+          var p =  FindObjectsOfType<SceneLoadingLogic>();
+          sceneLoadingLogic = p[p.Length-1];
     }
 
     public void LoadLevel2()

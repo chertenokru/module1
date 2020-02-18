@@ -51,6 +51,8 @@ MonoBehaviour:
   distanceFromEnemy: 1.2
   health: 4
   maxHealth: 4
+  danceAnimatorController: {fileID: 9100000, guid: 292b7f714ed3e4e4db5b37a359673130,
+    type: 2}
 --- !u!1001 &7718347244896904979
 PrefabInstance:
   m_ObjectHideFlags: 0
