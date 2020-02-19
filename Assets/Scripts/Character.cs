@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using UnityEditorInternal;
 using UnityEngine;
-using AnimatorController = UnityEditor.Animations.AnimatorController;
 
 
 public class Character : MonoBehaviour
@@ -64,7 +62,7 @@ public class Character : MonoBehaviour
     public int maxHealth = 4;
 
     // залипуха временная
-    public AnimatorController danceAnimatorController;
+    public RuntimeAnimatorController danceAnimatorController;
 
     public Transform Target
     {

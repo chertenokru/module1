@@ -11,6 +11,8 @@ public class GameController : MonoBehaviour
         Win,
         Lose
     }
+
+    public Shader selectShader;
     private List<Character> playerCharacters = new List<Character>();
     private List<Character> enemyCharacters = new List<Character>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;

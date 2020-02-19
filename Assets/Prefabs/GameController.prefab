@@ -43,3 +43,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c31f6c8570dc60d4aa329445b0f210df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectShader: {fileID: 4800000, guid: 9ce107479d11178d11005b9844295342, type: 3}
