@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 4412102059792531956}
   - component: {fileID: 978203786179939579}
   - component: {fileID: 1216888943583177719}
-  m_Layer: 0
-  m_Name: New SpriteShapeController (1)
+  - component: {fileID: 4756350986920542196}
+  m_Layer: 5
+  m_Name: TargetIndicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,11 +29,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7528022281784272270}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.075, y: 2.079, z: -0.17}
+  m_LocalPosition: {x: 0.17, y: 2.464, z: -0.33}
   m_LocalScale: {x: 0.48504, y: 0.115, z: 1}
   m_Children: []
   m_Father: {fileID: 8005653227702665063}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1971053207 &5463349584780078369
 SpriteShapeRenderer:
@@ -73,7 +74,7 @@ SpriteShapeRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Color: {r: 0.8679245, g: 0.78624535, b: 0.08597365, a: 1}
   m_MaskInteraction: 0
   m_ShapeTexture: {fileID: 0}
@@ -153,11 +154,11 @@ MonoBehaviour:
   m_SpriteShape: {fileID: 0}
   m_FillPixelPerUnit: 100
   m_StretchTiling: 1
-  m_SplineDetail: 16
+  m_SplineDetail: 8
   m_AdaptiveUV: 1
   m_StretchUV: 0
   m_WorldSpaceUV: 0
-  m_CornerAngleThreshold: 30
+  m_CornerAngleThreshold: 46.3
   m_ColliderDetail: 16
   m_ColliderOffset: 0
   m_UpdateCollider: 1
@@ -188,6 +189,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79be03d830f3a0748b9d982bccfc2180, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &4756350986920542196
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7528022281784272270}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 16297fef08bed2d47aaf3c3ac886276f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &8005653227702665060
 GameObject:
   m_ObjectHideFlags: 0
@@ -216,8 +236,8 @@ Transform:
   m_LocalPosition: {x: 1.54, y: 0.733, z: 1.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7318801585357025433}
   - {fileID: 6256024116194252344}
+  - {fileID: 7318801585357025433}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -302,7 +322,7 @@ PrefabInstance:
     - target: {fileID: 4453161890611786027, guid: 2bb4af201d8dc704fb89e527cbdea2f7,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4453161890611786027, guid: 2bb4af201d8dc704fb89e527cbdea2f7,
         type: 3}

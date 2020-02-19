@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4501186, g: 0.4976474, b: 0.5619204, a: 1}
+  m_IndirectSpecularColor: {r: 0.45011842, g: 0.4976471, b: 0.5619197, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1396,27 +1396,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
-      propertyPath: ObjectToAutoCreate.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
-      propertyPath: ObjectToAutoCreate.Array.data[1].gameobject
-      value: 
-      objectReference: {fileID: 8758610064687253698, guid: 1917fb5d9a6e8b140924f72621aaf63d,
+    - target: {fileID: 1695249091255025636, guid: dbf89b49c5f3c4f4b924cca649a3d44b,
         type: 3}
-    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
-      propertyPath: ObjectToAutoCreate.Array.data[1].isCreateInLevel
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
-      propertyPath: ObjectToAutoCreate.Array.data[2].gameobject
-      value: 
-      objectReference: {fileID: 176883736383380463, guid: 618f9aeddbb3d634fa0194986188429d,
-        type: 3}
-    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
-      propertyPath: ObjectToAutoCreate.Array.data[2].isCreateInLevel
-      value: 1
+      propertyPath: m_SortingOrder
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1695249092778903165, guid: dbf89b49c5f3c4f4b924cca649a3d44b,
         type: 3}

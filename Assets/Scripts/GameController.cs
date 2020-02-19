@@ -5,11 +5,23 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    public enum GameState
+    {
+        Game,
+        Win,
+        Lose
+    }
     private List<Character> playerCharacters = new List<Character>();
     private List<Character> enemyCharacters = new List<Character>();
-    Character currentTarget;
-    bool waitingPlayerInput;
+    private UIMenuWINLoseScript uiMenuWinLoseScript;
+    private Character currentTarget;
+    private bool waitingPlayerInput;
+    private GameState gameState = GameState.Game;
 
+    private void Awake()
+    {
+        uiMenuWinLoseScript = FindObjectOfType<UIMenuWINLoseScript>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -76,14 +88,15 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void PlayerWon()
+    void PlayerWin()
     {
-        Debug.Log("Player won");
+        uiMenuWinLoseScript.ShowMenu(true);
     }
 
     void PlayerLost()
     {
-        Debug.Log("Player lost");
+        
+        uiMenuWinLoseScript.ShowMenu(false);
     }
 
     Character FirstAliveCharacter(List<Character> characters)
@@ -101,13 +114,13 @@ public class GameController : MonoBehaviour
     {
         if (FirstAliveCharacter(playerCharacters) == null)
         {
-            PlayerLost();
+            gameState =  GameState.Lose;
             return true;
         }
 
         if (FirstAliveCharacter(enemyCharacters) == null)
         {
-            PlayerWon();
+            gameState = GameState.Win;
             return true;
         }
 
@@ -157,5 +170,19 @@ public class GameController : MonoBehaviour
                     yield return null;
             }
         }
+        // аниматор танца
+        List<Character> charList = (gameState == GameState.Lose) ? enemyCharacters : playerCharacters;
+        foreach (Character character in charList)
+        {
+            if (!character.IsDead())
+            {
+                character.Win();
+            }
+        }
+
+        // ждём 3 сек и выводим окно об окончании игры
+        yield return new WaitForSeconds(3.0f);
+        uiMenuWinLoseScript.ShowMenu(gameState == GameState.Win);
+
     }
 }

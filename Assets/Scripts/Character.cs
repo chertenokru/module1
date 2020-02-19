@@ -489,4 +489,10 @@ public class Character : MonoBehaviour
     {
         return state == State.Idle;
     }
+
+    public void Win()
+    {
+        animator.avatar = null;
+        animator.runtimeAnimatorController = danceAnimatorController;
+    }
 }

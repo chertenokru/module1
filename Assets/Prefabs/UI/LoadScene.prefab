@@ -46,7 +46,7 @@ MonoBehaviour:
   progressBarSlider: {fileID: 1695249092598558074}
   visualPart: {fileID: 1695249091255025632}
   loadingMessages: {fileID: 1695249092159691392}
-  fakeLoadTime: 5
+  fakeLoadTime: 3
   text:
   - "\u0421\u043E\u0437\u0434\u0430\u0439 \u0438 \u043F\u0440\u043E\u043A\u0430\u0447\u0430\u0439
     \u0441\u0432\u043E\u044E \u043A\u043E\u043C\u0430\u043D\u0434\u0443"
@@ -57,6 +57,18 @@ MonoBehaviour:
     \u0434\u043B\u044F \u043A\u043E\u043C\u0430\u043D\u0434\u044B"
   ObjectToAutoCreate:
   - gameobject: {fileID: 3491109140890446602, guid: 10e69a0982e14f040889d34c9e356a93,
+      type: 3}
+    isCreateInMenu: 0
+    isCreateInLevel: 1
+  - gameobject: {fileID: 7966335768360224099, guid: e0050d16d32bbb44cb756d6c8577fd5a,
+      type: 3}
+    isCreateInMenu: 0
+    isCreateInLevel: 1
+  - gameobject: {fileID: 8758610064687253698, guid: 1917fb5d9a6e8b140924f72621aaf63d,
+      type: 3}
+    isCreateInMenu: 0
+    isCreateInLevel: 1
+  - gameobject: {fileID: 176883736383380463, guid: 618f9aeddbb3d634fa0194986188429d,
       type: 3}
     isCreateInMenu: 0
     isCreateInLevel: 1

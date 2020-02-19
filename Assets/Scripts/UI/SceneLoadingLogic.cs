@@ -70,13 +70,23 @@ public class SceneLoadingLogic : MonoBehaviour
     {
         // останавливаем все возможные процессы
         StopAllCoroutines();
+        
+        
         // загружаем
         StartCoroutine(LoadGameSceneCor(sceneNo));
     }
 
     private IEnumerator LoadGameSceneCor(int sceneNo)
     {
+        foreach (GameObject o in GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE))
+        {
+            o.gameObject.SetActive(false);
+        }
+
         visualPart.SetActive(true);
+
+        
+        GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE);
         hidePart.SetActive(false);
 
         AsyncOperation asyncLoading = SceneManager.LoadSceneAsync(sceneNo);
@@ -122,6 +132,7 @@ public class SceneLoadingLogic : MonoBehaviour
                 (obj.isCreateInMenu && (sceneNo == (int) SceneNums.Menu)))
             {
                 Instantiate(obj.gameobject);
+                obj.gameobject.tag = TAG_UI_SCENE_TO_HIDE;
             }
         }
 

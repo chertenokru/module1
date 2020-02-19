@@ -10,13 +10,16 @@ public class EnemySpawner : MonoBehaviour
     public MeshRenderer planeBoundToSpawn;
     // сколько
     public int enemyCont = 2;
+    private Camera camera;
     
     
     void Awake()
     {
-        Spawn();
+        camera = Camera.main;
+        Spawn();    
     }
 
+    
     
 
     [ContextMenu("Player Move")]
@@ -28,7 +31,8 @@ public class EnemySpawner : MonoBehaviour
             var obj = enemy[Random.Range(0, enemy.Length )];
             Vector3 vector3 = new Vector3(Random.Range(planeBoundToSpawn.bounds.min.x, planeBoundToSpawn.bounds.max.x),planeBoundToSpawn.bounds.min.y,
                 Random.Range(planeBoundToSpawn.bounds.min.z, planeBoundToSpawn.bounds.max.z));
-            Instantiate(obj, vector3, Quaternion.identity);
+            Instantiate(obj, vector3, Quaternion.identity).gameObject.transform.LookAt(camera.transform);
+            
         }
     }
 }
