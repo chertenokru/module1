@@ -16,14 +16,11 @@ public class GameController : MonoBehaviour
     private List<Character> playerCharacters = new List<Character>();
     private List<Character> enemyCharacters = new List<Character>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;
+    private UILevelScript uiLevelScript;
     private Character currentTarget;
     private bool waitingPlayerInput;
     private GameState gameState = GameState.Game;
 
-    private void Awake()
-    {
-        uiMenuWinLoseScript = FindObjectOfType<UIMenuWINLoseScript>();
-    }
 
     // Start is called before the first frame update
     void Start()
@@ -35,15 +32,22 @@ public class GameController : MonoBehaviour
             else
                 enemyCharacters.Add(character);
         }
-
+        uiMenuWinLoseScript = FindObjectOfType<UIMenuWINLoseScript>();
+        uiLevelScript = FindObjectOfType<UILevelScript>();
+        
+        uiLevelScript.ShowMenu(false);
         StartCoroutine(GameLoop());
     }
 
     [ContextMenu("Player Move")]
     public void PlayerMove()
     {
+        
         if (waitingPlayerInput)
+        {
             waitingPlayerInput = false;
+            uiLevelScript.ShowMenu(false);
+        }
     }
 
     [ContextMenu("Switch character")]
@@ -142,9 +146,11 @@ public class GameController : MonoBehaviour
                 if (target == null)
                     break;
 
+                uiLevelScript.ShowMenu(true);
                 currentTarget = target;
                 currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
-
+                
+                
                 waitingPlayerInput = true;
                 while (waitingPlayerInput)
                     yield return null;
@@ -172,6 +178,7 @@ public class GameController : MonoBehaviour
                     yield return null;
             }
         }
+        
         // аниматор танца
         List<Character> charList = (gameState == GameState.Lose) ? enemyCharacters : playerCharacters;
         foreach (Character character in charList)

@@ -78,16 +78,16 @@ public class SceneLoadingLogic : MonoBehaviour
 
     private IEnumerator LoadGameSceneCor(int sceneNo)
     {
-        foreach (GameObject o in GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE))
+        foreach (GameObject tempGameObject in GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE))
         {
-            o.gameObject.SetActive(false);
+            tempGameObject.gameObject.SetActive(false);
         }
 
         visualPart.SetActive(true);
 
         
-        GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE);
-        hidePart.SetActive(false);
+        //GameObject.FindGameObjectsWithTag(TAG_UI_SCENE_TO_HIDE);
+        //hidePart.SetActive(false);
 
         AsyncOperation asyncLoading = SceneManager.LoadSceneAsync(sceneNo);
         asyncLoading.allowSceneActivation = false;
@@ -95,17 +95,17 @@ public class SceneLoadingLogic : MonoBehaviour
 
         float timer = 0;
         float startTime = Time.realtimeSinceStartup;
-        int i = 1;
+        int textToShowIndex = 1;
 
         while (timer < fakeLoadTime || asyncLoading.progress < 0.9f)
         {
             // залипуха с показом текста при загрузке
-            if ((100 / text.Length) * i < (timer / fakeLoadTime) * 100)
+            if ((100 / text.Length) * textToShowIndex < (timer / fakeLoadTime) * 100)
             {
-                if (i < text.Length)
+                if (textToShowIndex < text.Length)
                 {
-                    loadingMessages.text = text[i];
-                    i++;
+                    loadingMessages.text = text[textToShowIndex];
+                    textToShowIndex++;
                 }
             }
 
@@ -120,7 +120,7 @@ public class SceneLoadingLogic : MonoBehaviour
             yield return null;
         visualPart.SetActive(false);
         // ищем новый UI на загруженной сцене
-        hidePart = GameObject.FindGameObjectWithTag(TAG_UI_SCENE_TO_HIDE);
+        //hidePart = GameObject.FindGameObjectWithTag(TAG_UI_SCENE_TO_HIDE);
 
         // в главной сцене уже есть компонент - грохаем его
         if (sceneNo == (int) SceneNums.Menu)

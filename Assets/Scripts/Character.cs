@@ -35,7 +35,7 @@ public class Character : MonoBehaviour
     private bool isWarMode = false;
 
     private State state;
-    // переделать на id - придумать как хранить
+    //todo переделать на id - придумать как хранить
     // private const int AnimatorFieldSpeed = Animator.StringToHash("speed");
 
     [SerializeField] private Transform target;
@@ -49,16 +49,11 @@ public class Character : MonoBehaviour
     private GameObject weaponHand;
 
     private HealthBar healthBar;
-
-    // подставляется из оружия
-    private int weapontDamage = 1;
-
-
+  
     public CharacterType type = CharacterType.None;
     public float runSpeed = 0.05f;
     public float distanceFromEnemy = 1.2f;
     public int health = 4;
-
     public int maxHealth = 4;
 
     // залипуха временная
@@ -104,24 +99,24 @@ public class Character : MonoBehaviour
     // ищет случайную цель
     private bool AutoSelectTarget()
     {
-        Character temp;
+        Character tempCharacter;
         switch (type)
         {
             case CharacterType.PoliceMan:
-                temp = SearchTarget(CharacterType.Hooligan);
-                if (temp == null) temp = SearchTarget(CharacterType.Zombie);
-                if (temp == null) temp = SearchTarget(CharacterType.PoliceMan);
-                return SetTarget(temp);
+                tempCharacter = SearchTarget(CharacterType.Hooligan);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.Zombie);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.PoliceMan);
+                return SetTarget(tempCharacter);
             case CharacterType.Hooligan:
-                temp = SearchTarget(CharacterType.PoliceMan);
-                if (temp == null) temp = SearchTarget(CharacterType.Zombie);
-                if (temp == null) temp = SearchTarget(CharacterType.Hooligan);
-                return SetTarget(temp);
+                tempCharacter = SearchTarget(CharacterType.PoliceMan);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.Zombie);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.Hooligan);
+                return SetTarget(tempCharacter);
             case CharacterType.Zombie:
-                temp = SearchTarget(CharacterType.PoliceMan);
-                if (temp == null) temp = SearchTarget(CharacterType.Hooligan);
-                if (temp == null) temp = SearchTarget(CharacterType.Zombie);
-                return SetTarget(temp);
+                tempCharacter = SearchTarget(CharacterType.PoliceMan);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.Hooligan);
+                if (tempCharacter == null) tempCharacter = SearchTarget(CharacterType.Zombie);
+                return SetTarget(tempCharacter);
         }
 
         return false;
@@ -183,7 +178,6 @@ public class Character : MonoBehaviour
             GameObject obj = Instantiate(mesh, weaponHand.transform);
         }
 
-        weapontDamage = weaponsController.GetDamage(weaponsType);
     }
 
     // наночит урон и если труп то возвращает да
@@ -191,13 +185,11 @@ public class Character : MonoBehaviour
     {
         if (state == State.Dead) return true;
         SetHealth(health - damage);
-        //print(name + " get damage - " + damage);
         if (health <= 0)
         {
             SetHealth(0);
             SetState(State.Idle);
             SetState(State.Dead);
-            //print(name + " is dead !");
             return true;
         }
 
@@ -224,20 +216,17 @@ public class Character : MonoBehaviour
     {
         if (newTargetTransform == null)
         {
-            //  print($"{name} reported - target not found! ");
             return false;
         }
 
         target = newTargetTransform;
         targetCharacter = target.gameObject.GetComponent<Character>();
-        //print($"{name} set as target - {target.name}");
         return true;
     }
 
     // установка статусов
     public void SetState(State newState)
     {
-        //print($"{name} - {newState}");
         if (state == newState) return;
         state = newState;
         //animator setting    
@@ -469,7 +458,7 @@ public class Character : MonoBehaviour
     public void SetDamageEvent()
     {
         // наносим удар и если враг мёртв, то ищем следующего
-        if (targetCharacter.SetDamage(weapontDamage)) AutoSelectTarget();
+        if (targetCharacter.SetDamage(weaponsController.GetDamage(weaponsType))) AutoSelectTarget();
         // все здохли! а теперь - танцы !
         if (isWarMode && targetCharacter.state == State.Dead)
         {
