@@ -42,6 +42,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10562dcb1be11744cbd39d1a9603cba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6675751510151197848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4022456353391589101}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17044d43e8c86904bb9adefbb8ecd430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 6
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1001 &1902203076000523734
 PrefabInstance:
   m_ObjectHideFlags: 0

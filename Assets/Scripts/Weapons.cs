@@ -10,7 +10,8 @@ public class Weapons
     {
         None,
         Pistol,
-        Bat
+        Bat,
+        Knife
     }
 
     public WeaponsType weaponsType;

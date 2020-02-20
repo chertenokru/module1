@@ -49,7 +49,7 @@ public class MoveToTarget : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            print("-----------------");
+          //  print("-----------------");
             Ray castPoint = Camera.main.ScreenPointToRay(mouse);
             RaycastHit hit;
             Vector3 prev = transform.position;

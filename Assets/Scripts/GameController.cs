@@ -12,7 +12,10 @@ public class GameController : MonoBehaviour
         Lose
     }
 
-    public Shader selectShader;
+
+    public Color selectOutlineColor = Color.yellow;
+    public Color selectOutlineTargetColor = Color.red;
+    public int selectOutlineWith = 6;
     private List<Character> playerCharacters = new List<Character>();
     private List<Character> enemyCharacters = new List<Character>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;
@@ -32,17 +35,18 @@ public class GameController : MonoBehaviour
             else
                 enemyCharacters.Add(character);
         }
+
         uiMenuWinLoseScript = FindObjectOfType<UIMenuWINLoseScript>();
         uiLevelScript = FindObjectOfType<UILevelScript>();
-        
+
         uiLevelScript.ShowMenu(false);
         StartCoroutine(GameLoop());
     }
 
+    
     [ContextMenu("Player Move")]
     public void PlayerMove()
     {
-        
         if (waitingPlayerInput)
         {
             waitingPlayerInput = false;
@@ -53,6 +57,7 @@ public class GameController : MonoBehaviour
     [ContextMenu("Switch character")]
     public void SwitchCharacter()
     {
+        currentTarget.SwitchOutline(false);
         for (int i = 0; i < enemyCharacters.Count; i++)
         {
             // Найти текущего персонажа (i = индекс текущего)
@@ -68,7 +73,10 @@ public class GameController : MonoBehaviour
 
                     // Нашли живого, меняем currentTarget
                     currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(false);
+                    
+
                     currentTarget = enemyCharacters[i];
+                    currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
                     currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
 
                     return;
@@ -83,6 +91,7 @@ public class GameController : MonoBehaviour
                     // Нашли живого, меняем currentTarget
                     currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(false);
                     currentTarget = enemyCharacters[i];
+                    currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
                     currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
 
                     return;
@@ -101,7 +110,6 @@ public class GameController : MonoBehaviour
 
     void PlayerLost()
     {
-        
         uiMenuWinLoseScript.ShowMenu(false);
     }
 
@@ -120,7 +128,7 @@ public class GameController : MonoBehaviour
     {
         if (FirstAliveCharacter(playerCharacters) == null)
         {
-            gameState =  GameState.Lose;
+            gameState = GameState.Lose;
             return true;
         }
 
@@ -148,13 +156,15 @@ public class GameController : MonoBehaviour
 
                 uiLevelScript.ShowMenu(true);
                 currentTarget = target;
+                player.SwitchOutline(true,selectOutlineColor,selectOutlineWith);
+                currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
                 currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
-                
-                
+
                 waitingPlayerInput = true;
                 while (waitingPlayerInput)
                     yield return null;
-
+                player.SwitchOutline(false);
+                currentTarget.SwitchOutline(false);
                 currentTarget.GetComponentInChildren<TargetIndicator>().gameObject.SetActive(false);
 
                 player.SetTarget(currentTarget);
@@ -178,7 +188,7 @@ public class GameController : MonoBehaviour
                     yield return null;
             }
         }
-        
+
         // аниматор танца
         List<Character> charList = (gameState == GameState.Lose) ? enemyCharacters : playerCharacters;
         foreach (Character character in charList)
@@ -192,6 +202,5 @@ public class GameController : MonoBehaviour
         // ждём 3 сек и выводим окно об окончании игры
         yield return new WaitForSeconds(3.0f);
         uiMenuWinLoseScript.ShowMenu(gameState == GameState.Win);
-
     }
 }

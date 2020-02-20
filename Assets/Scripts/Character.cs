@@ -33,6 +33,8 @@ public class Character : MonoBehaviour
     private const string AnimatorDead = "dead";
     private const string TagWeaponHand = "Hand";
     private bool isWarMode = false;
+    private Outline outline;
+    
 
     private State state;
     //todo переделать на id - придумать как хранить
@@ -78,6 +80,9 @@ public class Character : MonoBehaviour
         InitWeaponCharacter();
         healthBar = GetComponentInChildren<HealthBar>();
         animator = GetComponentInChildren<Animator>();
+        outline = GetComponentInChildren<Outline>();
+        outline.enabled = false;
+            // SetWeapon(weaponsType);        
     }
 
 
@@ -93,7 +98,7 @@ public class Character : MonoBehaviour
         SetHealth(health);
         if (target == null) AutoSelectTarget();
         else SetTarget(target);
-        SetWeapon(weaponsType);
+
     }
 
     // ищет случайную цель
@@ -166,6 +171,8 @@ public class Character : MonoBehaviour
     /// подменяет mesh оружия и заменяет ущерб  
     private void SetWeapon(Weapons.WeaponsType value)
     {
+        bool stateOutline = outline.enabled;
+        outline.enabled = false;
         weaponsType = value;
         if (weaponHand.transform.childCount > 0)
         {
@@ -177,6 +184,10 @@ public class Character : MonoBehaviour
         {
             GameObject obj = Instantiate(mesh, weaponHand.transform);
         }
+        
+        // изменились меши - перекэшируем  
+        outline.UpdateMeshRenders();
+        if (outline.enabled != stateOutline) outline.enabled = stateOutline;
 
     }
 
@@ -481,5 +492,19 @@ public class Character : MonoBehaviour
     {
         animator.avatar = null;
         animator.runtimeAnimatorController = danceAnimatorController;
+    }
+
+    public void SwitchOutline(bool setOn)
+    {
+        SwitchOutline(setOn,outline.OutlineColor,outline.OutlineWidth);
+    }
+    public void SwitchOutline(bool setOn, Color color, float with)
+    {
+        if (setOn)
+        {
+            outline.OutlineColor = color;
+            outline.OutlineWidth = with;
+        }
+        outline.enabled = setOn;
     }
 }
