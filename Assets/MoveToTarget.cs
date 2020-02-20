@@ -6,24 +6,54 @@ using UnityEngine.AI;
 public class MoveToTarget : MonoBehaviour
 {
     private NavMeshAgent navMeshAgent;
-    // Start is called before the first frame update
+    private LineRenderer lineRenderer;
+    private NavMeshPath pathNavMesh;
+    private int layerMask;
+
+
+    private Vector3 oldMousePosition;
+
     void Start()
     {
+        pathNavMesh   = new NavMeshPath();
         navMeshAgent = GetComponent<NavMeshAgent>();
-
+        lineRenderer = GetComponent<LineRenderer>();
+        layerMask = LayerMask.GetMask("Ground");
     }
 
     // Update is called once per frame
     void Update()
     {
+        Vector3 mouse = Input.mousePosition;
+        if ((mouse - oldMousePosition).sqrMagnitude > .1f)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(mouse);
+
+            RaycastHit hit;
+            if (!Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+                lineRenderer.positionCount = 0;
+            else {
+                if (navMeshAgent.CalculatePath(hit.point, pathNavMesh))
+                {
+                    lineRenderer.positionCount = pathNavMesh.corners.Length;
+                    lineRenderer.SetPositions(pathNavMesh.corners);
+                
+                }
+                
+                
+            }
+            
+            
+            
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             print("-----------------");
-            Vector3 mouse = Input.mousePosition;
             Ray castPoint = Camera.main.ScreenPointToRay(mouse);
             RaycastHit hit;
             Vector3 prev = transform.position;
-            if (Physics.Raycast(castPoint,out hit,Mathf.Infinity))
+            if (Physics.Raycast(castPoint, out hit, Mathf.Infinity))
             {
                 NavMeshPath path = new NavMeshPath();
                 navMeshAgent.CalculatePath(hit.point, path);
@@ -37,5 +67,7 @@ public class MoveToTarget : MonoBehaviour
                 navMeshAgent.SetDestination(hit.point);
             }
         }
+
+        oldMousePosition = mouse;
     }
 }
