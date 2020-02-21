@@ -28,4 +28,27 @@ public class WeaponsController : MonoBehaviour
 
         return null;
     }
+
+    public bool isWeapontDistanceAttack(Weapons.WeaponsType type)
+    {
+        foreach (var weapon in Weaponses)
+        {
+            if (weapon.weaponsType == type)
+                return weapon.isDistanceAttack;
+        }
+
+        return false;
+    }
+
+
+    public float getWeapontDistanceAttack(Weapons.WeaponsType type)
+    {
+        foreach (var weapon in Weaponses)
+        {
+            if (weapon.weaponsType == type)
+                return weapon.isDistanceAttack ? weapon.distanceToAttack : 0;
+        }
+
+        return 99999999;
+    }
 }

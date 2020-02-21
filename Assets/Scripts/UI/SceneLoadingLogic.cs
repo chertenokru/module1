@@ -54,6 +54,11 @@ public class SceneLoadingLogic : MonoBehaviour
         DontDestroyOnLoad(transform.parent);
         hidePart = GameObject.FindGameObjectWithTag(TAG_UI_SCENE_TO_HIDE);
         visualPart.SetActive(false);
+
+        // заглушка чтобы можно было для отладки кинуть компонент на уровень и запускать напрямую без меню
+        if (SceneManager.GetActiveScene().buildIndex != (int) SceneNums.Menu) CreateObjectOnLoad(SceneManager.GetActiveScene().buildIndex);
+
+
     }
 
     public void LoadScene(string sceneName)
@@ -125,6 +130,16 @@ public class SceneLoadingLogic : MonoBehaviour
         // в главной сцене уже есть компонент - грохаем его
         if (sceneNo == (int) SceneNums.Menu)
             Destroy(transform.parent.gameObject);
+        
+        // смотрим что надо создать
+        CreateObjectOnLoad(sceneNo);
+
+        // включаем время
+        Time.timeScale = 1;
+    }
+
+    private void CreateObjectOnLoad(int sceneNo)
+    {
         // смотрим что надо создать
         foreach (DescriptionAutoCreatedObject obj in ObjectToAutoCreate)
         {
@@ -135,9 +150,6 @@ public class SceneLoadingLogic : MonoBehaviour
                 obj.gameobject.tag = TAG_UI_SCENE_TO_HIDE;
             }
         }
-
-        // включаем время
-        Time.timeScale = 1;
     }
 
     private void SetProgressBarProgress(float progress)

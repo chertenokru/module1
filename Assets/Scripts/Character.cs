@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 
-public class Character : MonoBehaviour
+public class Character : MonoBehaviour, ISelectable
 {
     public enum State
     {
@@ -23,7 +24,9 @@ public class Character : MonoBehaviour
         None,
         PoliceMan,
         Hooligan,
-        Zombie
+        Zombie,
+        Woman,
+        Man
     }
 
     private const string AnimatorFieldSpeed = "speed";
@@ -34,7 +37,7 @@ public class Character : MonoBehaviour
     private const string TagWeaponHand = "Hand";
     private bool isWarMode = false;
     private Outline outline;
-    
+
 
     private State state;
     //todo переделать на id - придумать как хранить
@@ -51,7 +54,7 @@ public class Character : MonoBehaviour
     private GameObject weaponHand;
 
     private HealthBar healthBar;
-  
+
     public CharacterType type = CharacterType.None;
     public float runSpeed = 0.05f;
     public float distanceFromEnemy = 1.2f;
@@ -81,8 +84,7 @@ public class Character : MonoBehaviour
         healthBar = GetComponentInChildren<HealthBar>();
         animator = GetComponentInChildren<Animator>();
         outline = GetComponentInChildren<Outline>();
-        outline.enabled = false;
-            // SetWeapon(weaponsType);        
+      
     }
 
 
@@ -98,7 +100,7 @@ public class Character : MonoBehaviour
         SetHealth(health);
         if (target == null) AutoSelectTarget();
         else SetTarget(target);
-
+        SetWeapon(weaponsType);  
     }
 
     // ищет случайную цель
@@ -171,12 +173,14 @@ public class Character : MonoBehaviour
     /// подменяет mesh оружия и заменяет ущерб  
     private void SetWeapon(Weapons.WeaponsType value)
     {
+        //print("set weapont on");
         bool stateOutline = outline.enabled;
-        outline.enabled = false;
+        if (outline.enabled) outline.enabled = false;
         weaponsType = value;
         if (weaponHand.transform.childCount > 0)
         {
-            Destroy(weaponHand.transform.GetChild(0).gameObject);
+            //Destroy(weaponHand.transform.GetChild(0).gameObject);
+            weaponHand.transform.GetChild(0).gameObject.SetActive(false);
         }
 
         GameObject mesh = weaponsController.GetMeshWeapont(weaponsType);
@@ -184,11 +188,11 @@ public class Character : MonoBehaviour
         {
             GameObject obj = Instantiate(mesh, weaponHand.transform);
         }
-        
-        // изменились меши - перекэшируем  
-        outline.UpdateMeshRenders();
-        if (outline.enabled != stateOutline) outline.enabled = stateOutline;
 
+        // изменились меши - перекэшируем
+        outline.UpdateMeshRenders();
+        
+        if (outline.enabled != stateOutline) outline.enabled = stateOutline;
     }
 
     // наночит урон и если труп то возвращает да
@@ -203,7 +207,7 @@ public class Character : MonoBehaviour
             SetState(State.Dead);
             return true;
         }
-
+        
         return false;
     }
 
@@ -262,14 +266,17 @@ public class Character : MonoBehaviour
                         break;
                     }
 
-                if (weaponsType == Weapons.WeaponsType.Bat)
+                switch (weaponsType)
                 {
-                    animator.SetTrigger(AnimatorAttack);
-                }
-
-                if (weaponsType == Weapons.WeaponsType.None)
-                {
-                    animator.SetTrigger(AnimatorAttackArm);
+                    case Weapons.WeaponsType.Bat:
+                        animator.SetTrigger(AnimatorAttack);
+                        break;
+                    case Weapons.WeaponsType.None:
+                        animator.SetTrigger(AnimatorAttackArm);
+                        break;
+                    default:
+                        animator.SetTrigger(AnimatorAttackArm);
+                        break;
                 }
 
                 break;
@@ -366,7 +373,7 @@ public class Character : MonoBehaviour
         }
 
         if (weaponHand == null)
-            throw new ApplicationException("Не найдена рука для оружия");
+            throw new ApplicationException($"Не найдена контейнер в руке для оружия, пометьте его тэгом {TagWeaponHand}");
     }
 
 
@@ -380,15 +387,13 @@ public class Character : MonoBehaviour
             return;
         }
 
-        switch (weaponsType)
+        if (weaponsController.isWeapontDistanceAttack(weaponsType))
         {
-            case Weapons.WeaponsType.Bat:
-            case Weapons.WeaponsType.None:
-                SetState(State.RunningToEnemy);
-                break;
-            case Weapons.WeaponsType.Pistol:
-                SetState(State.BeginShot);
-                break;
+            SetState(State.BeginShot);
+        }
+        else
+        {
+            SetState(State.RunningToEnemy);
         }
     }
 
@@ -432,6 +437,12 @@ public class Character : MonoBehaviour
     public void SetNoWeapon()
     {
         SetWeapon(Weapons.WeaponsType.None);
+    }
+
+    [ContextMenu("Weapon/Knife")]
+    public void SetKnifeWeapon()
+    {
+        SetWeapon(Weapons.WeaponsType.Knife);
     }
 
     [ContextMenu("Бойня !")]
@@ -494,17 +505,38 @@ public class Character : MonoBehaviour
         animator.runtimeAnimatorController = danceAnimatorController;
     }
 
-    public void SwitchOutline(bool setOn)
+    private void SwitchOutline(bool setOn)
     {
-        SwitchOutline(setOn,outline.OutlineColor,outline.OutlineWidth);
+        SwitchOutline(setOn, outline.OutlineColor, outline.OutlineWidth);
     }
-    public void SwitchOutline(bool setOn, Color color, float with)
+
+    private void SwitchOutline(bool setOn, Color color, float with)
     {
+        if (setOn == outline.enabled) return;
+        
         if (setOn)
         {
             outline.OutlineColor = color;
             outline.OutlineWidth = with;
         }
+
         outline.enabled = setOn;
     }
+
+    public void SwitchSelect(bool setOn)
+    {
+        SwitchOutline(setOn);
+    }
+
+    public void SwitchSelect(bool setOn, Color color, float with)
+    {
+        SwitchOutline(setOn, color, with);
+    }
+
+    public bool GetSelectStatus()
+    {
+        return outline.enabled;
+    }
+    
+    
 }

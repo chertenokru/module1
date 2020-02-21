@@ -9,6 +9,7 @@ public class MoveToTarget : MonoBehaviour
     private LineRenderer lineRenderer;
     private NavMeshPath pathNavMesh;
     private int layerMask;
+    private GameController gameController;
 
 
     private Vector3 oldMousePosition;
@@ -18,6 +19,7 @@ public class MoveToTarget : MonoBehaviour
         pathNavMesh   = new NavMeshPath();
         navMeshAgent = GetComponent<NavMeshAgent>();
         lineRenderer = GetComponent<LineRenderer>();
+        gameController = GetComponent<GameController>();
         layerMask = LayerMask.GetMask("Ground");
     }
 
@@ -37,10 +39,7 @@ public class MoveToTarget : MonoBehaviour
                 {
                     lineRenderer.positionCount = pathNavMesh.corners.Length;
                     lineRenderer.SetPositions(pathNavMesh.corners);
-                
                 }
-                
-                
             }
             
             

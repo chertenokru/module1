@@ -57,7 +57,7 @@ public class GameController : MonoBehaviour
     [ContextMenu("Switch character")]
     public void SwitchCharacter()
     {
-        currentTarget.SwitchOutline(false);
+        currentTarget.SwitchSelect(false);
         for (int i = 0; i < enemyCharacters.Count; i++)
         {
             // Найти текущего персонажа (i = индекс текущего)
@@ -72,12 +72,9 @@ public class GameController : MonoBehaviour
                         continue;
 
                     // Нашли живого, меняем currentTarget
-                    currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(false);
-                    
-
+                    currentTarget.SwitchSelect(false);
                     currentTarget = enemyCharacters[i];
-                    currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
-                    currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
+                    currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
 
                     return;
                 }
@@ -89,10 +86,9 @@ public class GameController : MonoBehaviour
                         continue;
 
                     // Нашли живого, меняем currentTarget
-                    currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(false);
+                    currentTarget.SwitchSelect(false);
                     currentTarget = enemyCharacters[i];
-                    currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
-                    currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
+                    currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
 
                     return;
                 }
@@ -143,6 +139,8 @@ public class GameController : MonoBehaviour
 
     IEnumerator GameLoop()
     {
+        yield return new WaitForSecondsRealtime(2.0f);
+        print("корутина стартанула");
         while (!CheckEndGame())
         {
             foreach (var player in playerCharacters)
@@ -156,16 +154,14 @@ public class GameController : MonoBehaviour
 
                 uiLevelScript.ShowMenu(true);
                 currentTarget = target;
-                player.SwitchOutline(true,selectOutlineColor,selectOutlineWith);
-                currentTarget.SwitchOutline(true,selectOutlineTargetColor,selectOutlineWith);
-                currentTarget.GetComponentInChildren<TargetIndicator>(true).gameObject.SetActive(true);
+                player.SwitchSelect(true,selectOutlineColor,selectOutlineWith);
+                currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
 
                 waitingPlayerInput = true;
                 while (waitingPlayerInput)
                     yield return null;
-                player.SwitchOutline(false);
-                currentTarget.SwitchOutline(false);
-                currentTarget.GetComponentInChildren<TargetIndicator>().gameObject.SetActive(false);
+                player.SwitchSelect(false);
+                currentTarget.SwitchSelect(false);
 
                 player.SetTarget(currentTarget);
                 player.Attack();
@@ -203,4 +199,6 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
         uiMenuWinLoseScript.ShowMenu(gameState == GameState.Win);
     }
+    
+    
 }
