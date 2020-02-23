@@ -20,7 +20,8 @@ public class GameController : MonoBehaviour
     private List<Character> enemyCharacters = new List<Character>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;
     private UILevelScript uiLevelScript;
-    private Character currentTarget;
+    public Character currentTarget;
+    public Character player;
     private bool waitingPlayerInput;
     private GameState gameState = GameState.Game;
 
@@ -43,7 +44,14 @@ public class GameController : MonoBehaviour
         StartCoroutine(GameLoop());
     }
 
-    
+    public bool isMovingMode(out Character character)
+    {
+        character = player;
+        if (waitingPlayerInput) return true;
+
+        return false;
+    }
+
     [ContextMenu("Player Move")]
     public void PlayerMove()
     {
@@ -72,10 +80,7 @@ public class GameController : MonoBehaviour
                         continue;
 
                     // Нашли живого, меняем currentTarget
-                    currentTarget.SwitchSelect(false);
-                    currentTarget = enemyCharacters[i];
-                    currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
-
+                    SetTarget(enemyCharacters[i]);
                     return;
                 }
 
@@ -86,10 +91,7 @@ public class GameController : MonoBehaviour
                         continue;
 
                     // Нашли живого, меняем currentTarget
-                    currentTarget.SwitchSelect(false);
-                    currentTarget = enemyCharacters[i];
-                    currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
-
+                    SetTarget(enemyCharacters[i]);
                     return;
                 }
 
@@ -139,13 +141,13 @@ public class GameController : MonoBehaviour
 
     IEnumerator GameLoop()
     {
-        yield return new WaitForSecondsRealtime(2.0f);
-        print("корутина стартанула");
+        //       yield return new WaitForSecondsRealtime(2.0f);
+        //       print("корутина стартанула");
         while (!CheckEndGame())
         {
-            foreach (var player in playerCharacters)
+            foreach (var _player in playerCharacters)
             {
-                if (player.IsDead())
+                if (_player.IsDead())
                     continue;
 
                 Character target = FirstAliveCharacter(enemyCharacters);
@@ -153,19 +155,22 @@ public class GameController : MonoBehaviour
                     break;
 
                 uiLevelScript.ShowMenu(true);
-                currentTarget = target;
-                player.SwitchSelect(true,selectOutlineColor,selectOutlineWith);
-                currentTarget.SwitchSelect(true,selectOutlineTargetColor,selectOutlineWith);
+                _player.distanceCurrentMove = _player.distanceMaxMove;
+                _player.SwitchSelect(true, selectOutlineColor, selectOutlineWith);
+                SetTarget(target);
+                player = _player;
+
 
                 waitingPlayerInput = true;
                 while (waitingPlayerInput)
                     yield return null;
-                player.SwitchSelect(false);
+                player = null;
+                _player.SwitchSelect(false);
                 currentTarget.SwitchSelect(false);
 
-                player.SetTarget(currentTarget);
-                player.Attack();
-                while (!player.IsIdle())
+                _player.SetTarget(currentTarget);
+                _player.Attack();
+                while (!_player.IsIdle())
                     yield return null;
             }
 
@@ -199,6 +204,77 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
         uiMenuWinLoseScript.ShowMenu(gameState == GameState.Win);
     }
-    
-    
+
+
+    // выбран интерактивный объекет, надо как-то отреагировать чтоли...
+    public bool MoveOnSelectebleObject(GameObject selObject)
+    {
+        if (waitingPlayerInput)
+        {
+            // персонаж?
+            Character selCharacter = selObject.transform.gameObject.GetComponentInParent<Character>();
+            if (selCharacter != null)
+            {
+                // чужой?  может быть выбран как цель
+                if (enemyCharacters.Contains(selCharacter) && !selCharacter.IsDead())
+                {
+                    // подсвечиваем
+                    selCharacter.SwitchSelect(true, selectOutlineTargetColor, selectOutlineWith);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // выбран интерактивный объекет, надо как-то отреагировать чтоли...
+    public void MoveOffSelectebleObject(GameObject selObject)
+    {
+        //if (waitingPlayerInput)
+        //{
+        // персонаж?
+        Character selCharacter = selObject.transform.gameObject.GetComponentInParent<Character>();
+        if (selCharacter != null)
+        {
+            // не должен быть выбран?
+            if (selCharacter != currentTarget && selCharacter != player)
+            {
+                // выключаем 
+                selCharacter.SwitchSelect(false);
+            }
+        }
+
+        //}
+    }
+
+
+    public bool ClickOnSelectebleCharacter(GameObject selObject)
+    {
+        if (waitingPlayerInput)
+        {
+            // персонаж?
+            Character selCharacter = selObject.transform.gameObject.GetComponentInParent<Character>();
+            if (selCharacter != null)
+            {
+                // чужой?  может быть выбран как цель
+                if (enemyCharacters.Contains(selCharacter) && !selCharacter.IsDead())
+                {
+                    // выбираем новой целью
+                    SetTarget(selCharacter);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private void SetTarget(Character target)
+    {
+        if (currentTarget != null) currentTarget.SwitchSelect(false);
+        currentTarget = target;
+        currentTarget.SwitchSelect(true, selectOutlineTargetColor, selectOutlineWith);
+    }
 }

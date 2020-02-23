@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using JetBrains.Annotations;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 public class Character : MonoBehaviour, ISelectable
@@ -15,7 +17,8 @@ public class Character : MonoBehaviour, ISelectable
         Attack,
         BeginShot, // дист аттака
         Shot,
-        Dead
+        Dead,
+        Run
     }
 
 
@@ -29,14 +32,16 @@ public class Character : MonoBehaviour, ISelectable
         Man
     }
 
-    private const string AnimatorFieldSpeed = "speed";
-    private const string AnimatorAttack = "attack";
-    private const string AnimatorAttackArm = "attack arm";
-    private const string AnimatorShot = "shot";
-    private const string AnimatorDead = "dead";
-    private const string TagWeaponHand = "Hand";
+    private const string ANIMATOR_FIELD_SPEED = "speed";
+    private const string ANIMATOR_ATTACK = "attack";
+    private const string ANIMATOR_ATTACK_ARM = "attack arm";
+    private const string ANIMATOR_SHOT = "shot";
+    private const string ANIMATOR_DEAD = "dead";
+    private const string TAG_WEAPON_HAND = "Hand";
     private bool isWarMode = false;
     private Outline outline;
+    public NavMeshAgent navMeshAgent;
+    public const string TAG_CHARACTER = "Character";
 
 
     private State state;
@@ -60,7 +65,9 @@ public class Character : MonoBehaviour, ISelectable
     public float distanceFromEnemy = 1.2f;
     public int health = 4;
     public int maxHealth = 4;
-
+    public float distanceCurrentMove = 3.0f;
+    public float distanceMaxMove = 3.0f;
+    private NavMeshPath path;
     // залипуха временная
     public RuntimeAnimatorController danceAnimatorController;
 
@@ -78,13 +85,16 @@ public class Character : MonoBehaviour, ISelectable
 
 
     private void Awake()
+    
     {
+        path = new NavMeshPath();
         // подставляем нужное оружие в модель
         InitWeaponCharacter();
         healthBar = GetComponentInChildren<HealthBar>();
         animator = GetComponentInChildren<Animator>();
         outline = GetComponentInChildren<Outline>();
-      
+        navMeshAgent = GetComponent<NavMeshAgent>();
+
     }
 
 
@@ -132,11 +142,19 @@ public class Character : MonoBehaviour, ISelectable
 
     void FixedUpdate()
     {
+    
+        
+        
         // статусы кроме анимации
         switch (state)
         {
             case State.Idle:
                 transform.rotation = startRotation;
+                if (navMeshAgent.velocity != Vector3.zero) SetState(State.Run);
+                break;
+            case State.Run:
+                if (!navMeshAgent.hasPath  || navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
+                print( $"hasPath -{navMeshAgent.hasPath} , velocity {navMeshAgent.velocity}");
                 break;
 
             case State.RunningToEnemy:
@@ -247,16 +265,20 @@ public class Character : MonoBehaviour, ISelectable
         //animator setting    
         switch (state)
         {
+            case State.Run:
+                animator.SetFloat(ANIMATOR_FIELD_SPEED, 1.0f);
+                break;
+
             case State.Idle:
-                animator.SetFloat(AnimatorFieldSpeed, 0.0f);
+                animator.SetFloat(ANIMATOR_FIELD_SPEED, 0.0f);
                 break;
             case State.RunningToEnemy:
                 startPosition = transform.position;
                 startRotation = transform.rotation;
-                animator.SetFloat(AnimatorFieldSpeed, runSpeed);
+                animator.SetFloat(ANIMATOR_FIELD_SPEED, runSpeed);
                 break;
             case State.RunningFromEnemy:
-                animator.SetFloat(AnimatorFieldSpeed, runSpeed);
+                animator.SetFloat(ANIMATOR_FIELD_SPEED, runSpeed);
                 break;
             case State.BeginAttack:
                 if (targetCharacter.state == State.Dead)
@@ -269,13 +291,13 @@ public class Character : MonoBehaviour, ISelectable
                 switch (weaponsType)
                 {
                     case Weapons.WeaponsType.Bat:
-                        animator.SetTrigger(AnimatorAttack);
+                        animator.SetTrigger(ANIMATOR_ATTACK);
                         break;
                     case Weapons.WeaponsType.None:
-                        animator.SetTrigger(AnimatorAttackArm);
+                        animator.SetTrigger(ANIMATOR_ATTACK_ARM);
                         break;
                     default:
-                        animator.SetTrigger(AnimatorAttackArm);
+                        animator.SetTrigger(ANIMATOR_ATTACK_ARM);
                         break;
                 }
 
@@ -290,12 +312,12 @@ public class Character : MonoBehaviour, ISelectable
 
                 startRotation = transform.rotation;
                 RotateToTarget(target.position);
-                animator.SetTrigger(AnimatorShot);
+                animator.SetTrigger(ANIMATOR_SHOT);
                 break;
 
             case State.Dead:
                 healthBar.gameObject.SetActive(false);
-                animator.SetTrigger(AnimatorDead);
+                animator.SetTrigger(ANIMATOR_DEAD);
                 break;
         }
     }
@@ -365,7 +387,7 @@ public class Character : MonoBehaviour, ISelectable
         // ищем руку для оружия, по метке
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
-            if (child.gameObject.CompareTag(TagWeaponHand))
+            if (child.gameObject.CompareTag(TAG_WEAPON_HAND))
             {
                 weaponHand = child.gameObject;
                 break;
@@ -373,7 +395,7 @@ public class Character : MonoBehaviour, ISelectable
         }
 
         if (weaponHand == null)
-            throw new ApplicationException($"Не найдена контейнер в руке для оружия, пометьте его тэгом {TagWeaponHand}");
+            throw new ApplicationException($"Не найдена контейнер в руке для оружия, пометьте его тэгом {TAG_WEAPON_HAND}");
     }
 
 
@@ -537,6 +559,58 @@ public class Character : MonoBehaviour, ISelectable
     {
         return outline.enabled;
     }
-    
-    
+
+    // вычисляет путь который может пройти игрок до указанной точки 
+    // возвращает длину этого пути и скорректированный navMeshPath
+    public float GetAlowedPath(Vector3 point,   NavMeshPath navMeshPath)
+    {
+        // отходился
+        if (distanceCurrentMove < float.Epsilon) return 0;
+        // если есть путь
+        if (navMeshAgent.CalculatePath(point, navMeshPath))
+        {
+            // накапливаем длину исходного пути в квадратах
+            float pathLenght = 0;
+ 
+            Vector3 beginPoint = transform.position;
+            float sqrDistance = distanceCurrentMove * distanceCurrentMove;
+
+            foreach (Vector3 corner in navMeshPath.corners)
+            {
+                float d = (beginPoint - corner).sqrMagnitude;
+                if ( (pathLenght+d) < sqrDistance)
+                    // ок, дальше
+                {
+                    pathLenght += d;
+                    beginPoint = corner;
+                }
+                // многовато будет
+                else
+                {
+                    //попробуем посчитать вектор последнего участка и умножить его на доступный остаток пути
+                    Vector3 v = (corner - beginPoint);
+                    beginPoint = beginPoint + v.normalized * (float)Math.Sqrt(sqrDistance - pathLenght);
+                    navMeshAgent.CalculatePath(beginPoint, navMeshPath);
+                    return distanceCurrentMove;
+                }
+                
+            }
+            
+ 
+            return (float)Math.Sqrt(pathLenght);
+        }
+        else return 0;
+
+    }
+
+    // go!
+    public void Move(Vector3 point)
+    {
+        float dist = GetAlowedPath(point, path);
+        if (dist != 0.0f)
+        {
+            navMeshAgent.SetPath(path);
+            distanceCurrentMove -= dist;
+        }
+    }
 }
