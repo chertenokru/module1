@@ -46,9 +46,9 @@ public class WeaponsController : MonoBehaviour
         foreach (var weapon in Weaponses)
         {
             if (weapon.weaponsType == type)
-                return weapon.isDistanceAttack ? weapon.distanceToAttack : 0;
+                return weapon.distanceToAttack;
         }
 
-        return 99999999;
+        return 0;
     }
 }

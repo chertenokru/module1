@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -13,20 +14,31 @@ public class GameController : MonoBehaviour
     }
 
 
+    public GameObject zoneSelectorPrefab;
     public Color selectOutlineColor = Color.yellow;
     public Color selectOutlineTargetColor = Color.red;
     public int selectOutlineWith = 6;
+
     private List<Character> playerCharacters = new List<Character>();
     private List<Character> enemyCharacters = new List<Character>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;
     private UILevelScript uiLevelScript;
-    public Character currentTarget;
-    public Character player;
-    private bool waitingPlayerInput;
+    private Character currentTarget;
+    private Character player;
     private GameState gameState = GameState.Game;
+    private ZoneSelector zoneSelectorTarget;
+    private ZoneSelector zoneSelectorPlayer;
+
+    private bool waitingPlayerInput;
+    private bool waitingPlayerMove;
 
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        zoneSelectorPlayer = Instantiate(zoneSelectorPrefab).GetComponent<ZoneSelector>();
+        zoneSelectorTarget = Instantiate(zoneSelectorPrefab).GetComponent<ZoneSelector>();
+    }
+
     void Start()
     {
         foreach (Character character in FindObjectsOfType<Character>())
@@ -52,7 +64,6 @@ public class GameController : MonoBehaviour
         return false;
     }
 
-    [ContextMenu("Player Move")]
     public void PlayerMove()
     {
         if (waitingPlayerInput)
@@ -62,7 +73,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    [ContextMenu("Switch character")]
     public void SwitchCharacter()
     {
         currentTarget.SwitchSelect(false);
@@ -154,16 +164,33 @@ public class GameController : MonoBehaviour
                 if (target == null)
                     break;
 
-                uiLevelScript.ShowMenu(true);
+                // подготовка
                 _player.distanceCurrentMove = _player.distanceMaxMove;
+
+                // включение всякого UI
+                uiLevelScript.ShowMenu(true);
+                zoneSelectorPlayer.ShowZone(_player);
                 _player.SwitchSelect(true, selectOutlineColor, selectOutlineWith);
+
                 SetTarget(target);
                 player = _player;
 
 
+                // ждём хода
                 waitingPlayerInput = true;
                 while (waitingPlayerInput)
+                {
                     yield return null;
+                    // если ждём окончания хода, и игрок встал, то обновляем UI
+                    if (waitingPlayerMove && player.IsIdle() && !player.navMeshAgent.hasPath)
+                    {
+                        waitingPlayerMove = false;
+                        zoneSelectorPlayer.ShowZone(player);
+                    }
+                }
+
+                // выключаем UI
+                zoneSelectorPlayer.HideZone();
                 player = null;
                 _player.SwitchSelect(false);
                 currentTarget.SwitchSelect(false);
@@ -179,14 +206,16 @@ public class GameController : MonoBehaviour
                 if (enemy.IsDead())
                     continue;
 
-                Character target = FirstAliveCharacter(playerCharacters);
-                if (target == null)
-                    break;
+                // Character target = FirstAliveCharacter(playerCharacters);
+                //if (target == null)
+                //    break;
 
-                enemy.SetTarget(target);
-                enemy.Attack();
-                while (!enemy.IsIdle())
+                //zoneSelectorTarget.ShowZone(enemy);
+                enemy.distanceCurrentMove = enemy.distanceMaxMove;
+                findEnemyTurn(enemy);
+                while (!enemy.IsIdle() && !enemy.navMeshAgent.hasPath)
                     yield return null;
+                zoneSelectorTarget.HideZone();
             }
         }
 
@@ -206,7 +235,54 @@ public class GameController : MonoBehaviour
     }
 
 
-    // выбран интерактивный объекет, надо как-то отреагировать чтоли...
+    private void findEnemyTurn(Character enemy)
+    {
+        Vector3 posEnemy = enemy.transform.position;
+        float distAttack = enemy.GetDistanceAttack();
+        Character charMinDist = null;
+        Character fireChar = null;
+        float minDist = 0;
+        FindMinDistOrFireDist(posEnemy, out charMinDist, out minDist);
+        if (minDist < distAttack)
+        {
+            enemy.SetTarget(charMinDist);
+            enemy.Attack();
+        }
+        else if (minDist < distAttack + enemy.distanceCurrentMove)
+        {
+            enemy.SetTarget(charMinDist);
+            enemy.Move(charMinDist.transform.position);
+        }
+        else
+        {
+            enemy.SetTarget(charMinDist);
+            enemy.Move(charMinDist.transform.position);
+        }
+    }
+
+
+    private void FindMinDistOrFireDist(Vector3 posEnemy, out Character charMinDist, out float minDist)
+    {
+        minDist = Single.PositiveInfinity;
+        charMinDist = null;
+        // посчитаем дистанцию до каждого врага
+        foreach (Character playerCharacter in playerCharacters)
+        {
+            if (!playerCharacter.IsDead())
+            {
+                float dist = Vector3.Distance(posEnemy, playerCharacter.transform.position);
+
+                if (minDist > dist)
+                {
+                    minDist = dist;
+                    charMinDist = playerCharacter;
+                }
+            }
+        }
+    }
+
+
+// выбран интерактивный объекет, надо как-то отреагировать чтоли...
     public bool MoveOnSelectebleObject(GameObject selObject)
     {
         if (waitingPlayerInput)
@@ -220,6 +296,7 @@ public class GameController : MonoBehaviour
                 {
                     // подсвечиваем
                     selCharacter.SwitchSelect(true, selectOutlineTargetColor, selectOutlineWith);
+                    zoneSelectorTarget.ShowZone(selCharacter);
                     return true;
                 }
             }
@@ -243,6 +320,8 @@ public class GameController : MonoBehaviour
                 // выключаем 
                 selCharacter.SwitchSelect(false);
             }
+
+            zoneSelectorTarget.HideZone();
         }
 
         //}
@@ -260,8 +339,10 @@ public class GameController : MonoBehaviour
                 // чужой?  может быть выбран как цель
                 if (enemyCharacters.Contains(selCharacter) && !selCharacter.IsDead())
                 {
+                    zoneSelectorTarget.HideZone();
                     // выбираем новой целью
                     SetTarget(selCharacter);
+
                     return true;
                 }
             }
@@ -276,5 +357,14 @@ public class GameController : MonoBehaviour
         if (currentTarget != null) currentTarget.SwitchSelect(false);
         currentTarget = target;
         currentTarget.SwitchSelect(true, selectOutlineTargetColor, selectOutlineWith);
+    }
+
+    public void MovePlayer(Vector3 point)
+    {
+        if (waitingPlayerInput)
+        {
+            player.Move(point);
+            waitingPlayerMove = true;
+        }
     }
 }

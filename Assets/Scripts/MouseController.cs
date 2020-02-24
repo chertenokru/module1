@@ -31,7 +31,7 @@ public class MouseController : MonoBehaviour
         pathNavMesh = new NavMeshPath();
         navMeshAgent = GetComponent<NavMeshAgent>();
         lineRenderer = GetComponent<LineRenderer>();
-        gameController = GetComponent<GameController>();
+        gameController = FindObjectOfType<GameController>();
         layerMask = LayerMask.GetMask("Ground");
         layerMaskObject = LayerMask.GetMask("InteractiveObject");
         eventSystem = FindObjectOfType<EventSystem>();
@@ -89,7 +89,11 @@ public class MouseController : MonoBehaviour
                     else
                     {
                         //перемешаем
-                        if (Input.GetMouseButtonDown(0)) character.Move(raycastHit.point);
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            gameController.MovePlayer(raycastHit.point);
+                            lineRenderer.positionCount = 0;
+                        }
                         //рисуем возможный путь
                         else
                         {

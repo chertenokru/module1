@@ -67,7 +67,9 @@ public class Character : MonoBehaviour, ISelectable
     public int maxHealth = 4;
     public float distanceCurrentMove = 3.0f;
     public float distanceMaxMove = 3.0f;
+
     private NavMeshPath path;
+
     // залипуха временная
     public RuntimeAnimatorController danceAnimatorController;
 
@@ -85,7 +87,7 @@ public class Character : MonoBehaviour, ISelectable
 
 
     private void Awake()
-    
+
     {
         path = new NavMeshPath();
         // подставляем нужное оружие в модель
@@ -94,13 +96,14 @@ public class Character : MonoBehaviour, ISelectable
         animator = GetComponentInChildren<Animator>();
         outline = GetComponentInChildren<Outline>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
+        navMeshAgent.updateRotation = false;
+
         healthBar.SetMaxHealth(maxHealth);
         state = State.Idle;
 
@@ -110,7 +113,7 @@ public class Character : MonoBehaviour, ISelectable
         SetHealth(health);
         if (target == null) AutoSelectTarget();
         else SetTarget(target);
-        SetWeapon(weaponsType);  
+        SetWeapon(weaponsType);
     }
 
     // ищет случайную цель
@@ -142,9 +145,6 @@ public class Character : MonoBehaviour, ISelectable
 
     void FixedUpdate()
     {
-    
-        
-        
         // статусы кроме анимации
         switch (state)
         {
@@ -153,8 +153,9 @@ public class Character : MonoBehaviour, ISelectable
                 if (navMeshAgent.velocity != Vector3.zero) SetState(State.Run);
                 break;
             case State.Run:
-                if (!navMeshAgent.hasPath  || navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
-                print( $"hasPath -{navMeshAgent.hasPath} , velocity {navMeshAgent.velocity}");
+                transform.rotation = Quaternion.LookRotation(navMeshAgent.velocity.normalized);
+                if (!navMeshAgent.hasPath || navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
+                print($"hasPath -{navMeshAgent.hasPath} , velocity {navMeshAgent.velocity}");
                 break;
 
             case State.RunningToEnemy:
@@ -209,7 +210,7 @@ public class Character : MonoBehaviour, ISelectable
 
         // изменились меши - перекэшируем
         outline.UpdateMeshRenders();
-        
+
         if (outline.enabled != stateOutline) outline.enabled = stateOutline;
     }
 
@@ -225,7 +226,7 @@ public class Character : MonoBehaviour, ISelectable
             SetState(State.Dead);
             return true;
         }
-        
+
         return false;
     }
 
@@ -272,21 +273,13 @@ public class Character : MonoBehaviour, ISelectable
             case State.Idle:
                 animator.SetFloat(ANIMATOR_FIELD_SPEED, 0.0f);
                 break;
-            case State.RunningToEnemy:
-                startPosition = transform.position;
-                startRotation = transform.rotation;
-                animator.SetFloat(ANIMATOR_FIELD_SPEED, runSpeed);
-                break;
-            case State.RunningFromEnemy:
-                animator.SetFloat(ANIMATOR_FIELD_SPEED, runSpeed);
-                break;
+
             case State.BeginAttack:
                 if (targetCharacter.state == State.Dead)
-                    if (!AutoSelectTarget())
-                    {
-                        SetState(State.Idle);
-                        break;
-                    }
+                {
+                    SetState(State.Idle);
+                    break;
+                }
 
                 switch (weaponsType)
                 {
@@ -304,13 +297,8 @@ public class Character : MonoBehaviour, ISelectable
                 break;
             case State.BeginShot:
                 if (targetCharacter.state == State.Dead)
-                    if (!AutoSelectTarget())
-                    {
-                        SetState(State.Idle);
-                        break;
-                    }
 
-                startRotation = transform.rotation;
+                    startRotation = transform.rotation;
                 RotateToTarget(target.position);
                 animator.SetTrigger(ANIMATOR_SHOT);
                 break;
@@ -332,21 +320,23 @@ public class Character : MonoBehaviour, ISelectable
     public bool RunToTowards(Vector3 targetPosition, float distanceFromTarget)
     {
         Vector3 selfPosition = transform.position;
-        // считаем  вектор до цели
+
+// считаем  вектор до цели
         Vector3 distance = targetPosition - selfPosition;
         Vector3 direction = distance.normalized;
         transform.rotation = Quaternion.LookRotation(direction);
-        //     transform.LookAt(targetPosition);
+//     transform.LookAt(targetPosition);
 
-        // цель с учётом отступа от неё
+// цель с учётом отступа от неё
         targetPosition -= direction * distanceFromTarget;
 
-        // вектор перемещения
+// вектор перемещения
         Vector3 vector = direction * runSpeed;
-        // скоректированный вектор до цели
+
+// скоректированный вектор до цели
         distance = (targetPosition - selfPosition);
 
-        // проверяем через квадрат дистанции - дошли или нет 
+// проверяем через квадрат дистанции - дошли или нет 
         if (vector.sqrMagnitude < distance.sqrMagnitude)
         {
             transform.position += vector;
@@ -357,7 +347,7 @@ public class Character : MonoBehaviour, ISelectable
         return true;
     }
 
-    // поиск цели по типу, если находит, то возвращает цель
+// поиск цели по типу, если находит, то возвращает цель
     private Character SearchTarget(CharacterType type)
     {
         Character[] chars = GameObject.FindObjectsOfType<Character>();
@@ -377,10 +367,10 @@ public class Character : MonoBehaviour, ISelectable
         return null;
     }
 
-    //Начальная настройка оружия 
+//Начальная настройка оружия 
     private void InitWeaponCharacter()
     {
-        // контроллер оружия
+// контроллер оружия
         weaponsController = FindObjectOfType<WeaponsController>();
         if (weaponsController == null)
             throw new ApplicationException("Не найден нужный класс WeaponsController");
@@ -395,7 +385,8 @@ public class Character : MonoBehaviour, ISelectable
         }
 
         if (weaponHand == null)
-            throw new ApplicationException($"Не найдена контейнер в руке для оружия, пометьте его тэгом {TAG_WEAPON_HAND}");
+            throw new ApplicationException(
+                $"Не найдена контейнер в руке для оружия, пометьте его тэгом {TAG_WEAPON_HAND}");
     }
 
 
@@ -403,7 +394,6 @@ public class Character : MonoBehaviour, ISelectable
     public void Attack()
     {
         if (state != State.Idle) return;
-
         if (target == null)
         {
             return;
@@ -415,7 +405,7 @@ public class Character : MonoBehaviour, ISelectable
         }
         else
         {
-            SetState(State.RunningToEnemy);
+            SetState(State.BeginAttack);
         }
     }
 
@@ -473,13 +463,13 @@ public class Character : MonoBehaviour, ISelectable
         StartCoroutine(War());
     }
 
-    //все против всех
+//все против всех
     public IEnumerator War()
     {
         isWarMode = true;
         Character[] listChar = FindObjectsOfType<Character>();
-        var countLife = listChar.Length;
 
+        var countLife = listChar.Length;
         while (countLife > 1)
         {
             countLife = 0;
@@ -497,11 +487,11 @@ public class Character : MonoBehaviour, ISelectable
         }
     }
 
-    // вызывается тригером анимации в момент урона, анимация играется дальше
-    //  а программа наносит урон
+// вызывается тригером анимации в момент урона, анимация играется дальше
+//  а программа наносит урон
     public void SetDamageEvent()
     {
-        // наносим удар и если враг мёртв, то ищем следующего
+// наносим удар и если враг мёртв, то ищем следующего
         if (targetCharacter.SetDamage(weaponsController.GetDamage(weaponsType))) AutoSelectTarget();
         // все здохли! а теперь - танцы !
         if (isWarMode && targetCharacter.state == State.Dead)
@@ -535,7 +525,6 @@ public class Character : MonoBehaviour, ISelectable
     private void SwitchOutline(bool setOn, Color color, float with)
     {
         if (setOn == outline.enabled) return;
-        
         if (setOn)
         {
             outline.OutlineColor = color;
@@ -560,25 +549,23 @@ public class Character : MonoBehaviour, ISelectable
         return outline.enabled;
     }
 
-    // вычисляет путь который может пройти игрок до указанной точки 
-    // возвращает длину этого пути и скорректированный navMeshPath
-    public float GetAlowedPath(Vector3 point,   NavMeshPath navMeshPath)
+// вычисляет путь который может пройти игрок до указанной точки 
+// возвращает длину этого пути и скорректированный navMeshPath
+    public float GetAlowedPath(Vector3 point, NavMeshPath navMeshPath)
     {
-        // отходился
+// отходился
         if (distanceCurrentMove < float.Epsilon) return 0;
-        // если есть путь
+// если есть путь
         if (navMeshAgent.CalculatePath(point, navMeshPath))
         {
             // накапливаем длину исходного пути в квадратах
             float pathLenght = 0;
- 
             Vector3 beginPoint = transform.position;
-            float sqrDistance = distanceCurrentMove * distanceCurrentMove;
 
             foreach (Vector3 corner in navMeshPath.corners)
             {
-                float d = (beginPoint - corner).sqrMagnitude;
-                if ( (pathLenght+d) < sqrDistance)
+                float d = Vector3.Distance(beginPoint, corner);
+                if ((pathLenght + d) < distanceCurrentMove)
                     // ок, дальше
                 {
                     pathLenght += d;
@@ -589,28 +576,58 @@ public class Character : MonoBehaviour, ISelectable
                 {
                     //попробуем посчитать вектор последнего участка и умножить его на доступный остаток пути
                     Vector3 v = (corner - beginPoint);
-                    beginPoint = beginPoint + v.normalized * (float)Math.Sqrt(sqrDistance - pathLenght);
+                    beginPoint = beginPoint + v.normalized * (distanceCurrentMove - pathLenght);
                     navMeshAgent.CalculatePath(beginPoint, navMeshPath);
                     return distanceCurrentMove;
                 }
-                
             }
-            
- 
-            return (float)Math.Sqrt(pathLenght);
+
+
+            /*
+                Vector3 beginPoint = transform.position;
+                float sqrDistance = distanceCurrentMove * distanceCurrentMove;
+        
+                foreach (Vector3 corner in navMeshPath.corners)
+                {
+                    float d = (beginPoint - corner).sqrMagnitude;
+                    if ((pathLenght + d) < sqrDistance)
+                        // ок, дальше
+                    {
+                        pathLenght += d;
+                        beginPoint = corner;
+                    }
+                    // многовато будет
+                    else
+                    {
+                        //попробуем посчитать вектор последнего участка и умножить его на доступный остаток пути
+                        Vector3 v = (corner - beginPoint);
+                        beginPoint = beginPoint + v.normalized * (float) Math.Sqrt(sqrDistance - pathLenght);
+                        navMeshAgent.CalculatePath(beginPoint, navMeshPath);
+                        return distanceCurrentMove;
+                    }
+        
+                }
+        
+            */
+            return (float) Math.Sqrt(pathLenght);
         }
         else return 0;
-
     }
 
-    // go!
+// go!
     public void Move(Vector3 point)
     {
         float dist = GetAlowedPath(point, path);
         if (dist != 0.0f)
         {
+            SetState(State.Run);
             navMeshAgent.SetPath(path);
             distanceCurrentMove -= dist;
         }
+    }
+
+    public float GetDistanceAttack()
+    {
+        return weaponsController.getWeapontDistanceAttack(weaponsType);
     }
 }
