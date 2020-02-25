@@ -11,8 +11,6 @@ public class Character : MonoBehaviour, ISelectable
     public enum State
     {
         Idle,
-        RunningToEnemy,
-        RunningFromEnemy,
         BeginAttack, // близкая атака
         Attack,
         BeginShot, // дист аттака
@@ -145,20 +143,21 @@ public class Character : MonoBehaviour, ISelectable
 
     void FixedUpdate()
     {
+        
+        //if (navMeshAgent.velocity != Vector3.zero)
+        animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
         // статусы кроме анимации
         switch (state)
         {
             case State.Idle:
                 transform.rotation = startRotation;
-                if (navMeshAgent.velocity != Vector3.zero) SetState(State.Run);
                 break;
             case State.Run:
                 transform.rotation = Quaternion.LookRotation(navMeshAgent.velocity.normalized);
-                if (!navMeshAgent.hasPath || navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
-                print($"hasPath -{navMeshAgent.hasPath} , velocity {navMeshAgent.velocity}");
+                if (!navMeshAgent.hasPath && navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
                 break;
 
-            case State.RunningToEnemy:
+/*            case State.RunningToEnemy:
                 if (RunToTowards(target.position, distanceFromEnemy))
                 {
                     SetState(State.Idle);
@@ -178,6 +177,7 @@ public class Character : MonoBehaviour, ISelectable
                 }
 
                 break;
+ */
             case State.Shot:
                 if (targetCharacter != null)
                 {
@@ -629,5 +629,10 @@ public class Character : MonoBehaviour, ISelectable
     public float GetDistanceAttack()
     {
         return weaponsController.getWeapontDistanceAttack(weaponsType);
+    }
+
+    public void TurnReset()
+    {
+        distanceCurrentMove = distanceMaxMove;
     }
 }

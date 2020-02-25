@@ -6,23 +6,22 @@ using UnityEngine.UI;
 
 public class UILevelScript : MonoBehaviour
 {
-    public Button buttonAttack;
-    public Button buttonChangeTarget;
+    
+    public Button buttonCancelTurn;
     private GameController gameController;
 
 
     private void Start()
     {
         gameController = FindObjectOfType<GameController>();
-        buttonAttack.onClick.AddListener(gameController.PlayerMove);
-        buttonChangeTarget.onClick.AddListener(gameController.SwitchCharacter);
+        buttonCancelTurn.onClick.AddListener(gameController.CancelCharacterTurn);
     }
 
     public void ShowMenu(bool isVisible)
     {
-        buttonAttack.gameObject.SetActive(isVisible);
-        buttonChangeTarget.gameObject.SetActive(isVisible);
+        buttonCancelTurn.gameObject.SetActive(isVisible);
         
     }
 
+    
 }

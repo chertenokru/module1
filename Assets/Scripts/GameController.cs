@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,6 +14,52 @@ public class GameController : MonoBehaviour
         Win,
         Lose
     }
+    
+    
+    public class CharacterInfo
+    {
+        
+        public enum CharacterState
+        {
+            CharacterMove,
+            CharacterFire,
+            CharacterIdle
+        }
+
+        
+        public Character character;
+        public bool canMove = true;
+        public bool canFire = true;
+        public bool isEndTurn = false;
+        public CharacterState characterState = CharacterState.CharacterIdle;
+
+        public CharacterInfo(Character _character)
+        {
+            character = _character;
+        }
+
+        public void TurnReset()
+        {
+            canFire = true;
+            canMove = true;
+            isEndTurn = false;
+            character.TurnReset();
+            characterState = CharacterState.CharacterIdle;
+        }
+
+        public void EndTurn()
+        {
+            canFire = false;
+            canMove = false;
+            isEndTurn = true;
+        }
+
+        public void Update(bool _canFire)
+        {
+            canFire = _canFire;
+            canMove = (character.distanceCurrentMove > 0.1f);
+        }
+    }
 
 
     public GameObject zoneSelectorPrefab;
@@ -19,12 +67,15 @@ public class GameController : MonoBehaviour
     public Color selectOutlineTargetColor = Color.red;
     public int selectOutlineWith = 6;
 
-    private List<Character> playerCharacters = new List<Character>();
-    private List<Character> enemyCharacters = new List<Character>();
+    private Dictionary<Character, CharacterInfo> playerCharacters = new Dictionary<Character, CharacterInfo>();
+    private Dictionary<Character, CharacterInfo> enemyCharacters = new Dictionary<Character, CharacterInfo>();
+    private List<CharacterInfo> targetList = new List<CharacterInfo>();
     private UIMenuWINLoseScript uiMenuWinLoseScript;
     private UILevelScript uiLevelScript;
     private Character currentTarget;
     private Character player;
+    private CharacterInfo currentTargetCharacterInfo;
+    private CharacterInfo playerCharacterInfo;
     private GameState gameState = GameState.Game;
     private ZoneSelector zoneSelectorTarget;
     private ZoneSelector zoneSelectorPlayer;
@@ -44,9 +95,9 @@ public class GameController : MonoBehaviour
         foreach (Character character in FindObjectsOfType<Character>())
         {
             if (character.type == Character.CharacterType.PoliceMan)
-                playerCharacters.Add(character);
+                playerCharacters.Add(character, new CharacterInfo(character));
             else
-                enemyCharacters.Add(character);
+                enemyCharacters.Add(character, new CharacterInfo(character));
         }
 
         uiMenuWinLoseScript = FindObjectOfType<UIMenuWINLoseScript>();
@@ -59,7 +110,7 @@ public class GameController : MonoBehaviour
     public bool isMovingMode(out Character character)
     {
         character = player;
-        if (waitingPlayerInput) return true;
+        if (playerCharacterInfo.canMove) return true;
 
         return false;
     }
@@ -73,43 +124,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void SwitchCharacter()
-    {
-        currentTarget.SwitchSelect(false);
-        for (int i = 0; i < enemyCharacters.Count; i++)
-        {
-            // Найти текущего персонажа (i = индекс текущего)
-            if (enemyCharacters[i] == currentTarget)
-            {
-                int start = i;
-                ++i;
-                // Идем в сторону конца массива и ищем живого персонажа
-                for (; i < enemyCharacters.Count; i++)
-                {
-                    if (enemyCharacters[i].IsDead())
-                        continue;
-
-                    // Нашли живого, меняем currentTarget
-                    SetTarget(enemyCharacters[i]);
-                    return;
-                }
-
-                // Идем от начала массива до текущего и смотрим, если там кто живой
-                for (i = 0; i < start; i++)
-                {
-                    if (enemyCharacters[i].IsDead())
-                        continue;
-
-                    // Нашли живого, меняем currentTarget
-                    SetTarget(enemyCharacters[i]);
-                    return;
-                }
-
-                // Живых больше не осталось, не меняем currentTarget
-                return;
-            }
-        }
-    }
 
     void PlayerWin()
     {
@@ -121,16 +135,36 @@ public class GameController : MonoBehaviour
         uiMenuWinLoseScript.ShowMenu(false);
     }
 
-    Character FirstAliveCharacter(List<Character> characters)
+    CharacterInfo FirstAliveCharacter(Dictionary<Character, CharacterInfo> charactersInfos)
     {
-        foreach (var character in characters)
+        // убираем трупы
+        foreach (Character character in charactersInfos.Keys)
         {
-            if (!character.IsDead())
-                return character;
+            if (character.IsDead()) charactersInfos.Remove(character);
         }
+
+        // остался кто?
+        if (charactersInfos.Count > 0) return charactersInfos.First().Value;
 
         return null;
     }
+
+    private void FindTargetList(Character character, Dictionary<Character, CharacterInfo> charactersInfos,
+        List<CharacterInfo> targetList)
+    {
+        targetList.Clear();
+        foreach (Character _character in charactersInfos.Keys)
+        {
+            if (!_character.IsDead() &&
+                (Vector3.Distance(_character.transform.position, character.transform.position) <=
+                 character.GetDistanceAttack())
+            )
+            {
+                targetList.Add(charactersInfos[_character]);
+            }
+        }
+    }
+
 
     bool CheckEndGame()
     {
@@ -157,70 +191,85 @@ public class GameController : MonoBehaviour
         {
             foreach (var _player in playerCharacters)
             {
-                if (_player.IsDead())
-                    continue;
-
-                Character target = FirstAliveCharacter(enemyCharacters);
-                if (target == null)
-                    break;
+                player = _player.Key;
+                playerCharacterInfo = _player.Value;
+                FindTargetList(player, playerCharacters, targetList);
 
                 // подготовка
-                _player.distanceCurrentMove = _player.distanceMaxMove;
+                playerCharacterInfo.TurnReset();
+
+                if (targetList.Count > 0)
+                {
+                    currentTarget = targetList[0].character;
+                    currentTargetCharacterInfo = targetList[0];
+                }
+                else
+                {
+                    currentTarget = null;
+                    currentTargetCharacterInfo = null;
+                    playerCharacterInfo.canFire = false;
+                }
+
 
                 // включение всякого UI
                 uiLevelScript.ShowMenu(true);
-                zoneSelectorPlayer.ShowZone(_player);
-                _player.SwitchSelect(true, selectOutlineColor, selectOutlineWith);
-
-                SetTarget(target);
-                player = _player;
-
+                zoneSelectorPlayer.ShowZone(player);
+                player.SwitchSelect(true, selectOutlineColor, selectOutlineWith);
 
                 // ждём хода
-                waitingPlayerInput = true;
-                while (waitingPlayerInput)
+                while (!playerCharacterInfo.isEndTurn)
                 {
-                    yield return null;
-                    // если ждём окончания хода, и игрок встал, то обновляем UI
-                    if (waitingPlayerMove && player.IsIdle() && !player.navMeshAgent.hasPath)
+                    if (player.IsIdle() &&
+                        playerCharacterInfo.characterState == CharacterInfo.CharacterState.CharacterFire)
                     {
-                        waitingPlayerMove = false;
+                        playerCharacterInfo.characterState = CharacterInfo.CharacterState.CharacterIdle;
+                        playerCharacterInfo.Update(false);
                         zoneSelectorPlayer.ShowZone(player);
                     }
+                    if (player.IsIdle() &&
+                        playerCharacterInfo.characterState == CharacterInfo.CharacterState.CharacterMove)
+                    {
+                        playerCharacterInfo.characterState = CharacterInfo.CharacterState.CharacterIdle;
+                        playerCharacterInfo.Update(false);
+                        zoneSelectorPlayer.ShowZone(player);
+                    }
+
+                    if (!playerCharacterInfo.canFire && !playerCharacterInfo.canMove &&
+                        playerCharacterInfo.characterState == CharacterInfo.CharacterState.CharacterIdle)
+                    {
+                        playerCharacterInfo.isEndTurn = true;
+                    }
+                    
+
+                    yield return null;
                 }
 
                 // выключаем UI
                 zoneSelectorPlayer.HideZone();
+                player.SwitchSelect(false);
                 player = null;
-                _player.SwitchSelect(false);
-                currentTarget.SwitchSelect(false);
-
-                _player.SetTarget(currentTarget);
-                _player.Attack();
-                while (!_player.IsIdle())
-                    yield return null;
+                if (currentTarget != null) currentTarget.SwitchSelect(false);
             }
 
+            /*
             foreach (var enemy in enemyCharacters)
             {
-                if (enemy.IsDead())
+                if (enemy.character.IsDead())
                     continue;
-
-                // Character target = FirstAliveCharacter(playerCharacters);
-                //if (target == null)
-                //    break;
-
-                //zoneSelectorTarget.ShowZone(enemy);
-                enemy.distanceCurrentMove = enemy.distanceMaxMove;
-                findEnemyTurn(enemy);
-                while (!enemy.IsIdle() && !enemy.navMeshAgent.hasPath)
+                zoneSelectorTarget.ShowZone(enemy.character);
+                enemy.TurnReset();
+                findEnemyTurn(enemy.character);
+                while (!enemy.isEndTurn)
                     yield return null;
                 zoneSelectorTarget.HideZone();
             }
+            */
         }
 
         // аниматор танца
-        List<Character> charList = (gameState == GameState.Lose) ? enemyCharacters : playerCharacters;
+        List<Character> charList = (gameState == GameState.Lose)
+            ? enemyCharacters.Keys.ToList()
+            : playerCharacters.Keys.ToList();
         foreach (Character character in charList)
         {
             if (!character.IsDead())
@@ -266,7 +315,7 @@ public class GameController : MonoBehaviour
         minDist = Single.PositiveInfinity;
         charMinDist = null;
         // посчитаем дистанцию до каждого врага
-        foreach (Character playerCharacter in playerCharacters)
+        foreach (Character playerCharacter in playerCharacters.Keys)
         {
             if (!playerCharacter.IsDead())
             {
@@ -285,14 +334,14 @@ public class GameController : MonoBehaviour
 // выбран интерактивный объекет, надо как-то отреагировать чтоли...
     public bool MoveOnSelectebleObject(GameObject selObject)
     {
-        if (waitingPlayerInput)
+        if (!playerCharacterInfo.isEndTurn)
         {
             // персонаж?
             Character selCharacter = selObject.transform.gameObject.GetComponentInParent<Character>();
             if (selCharacter != null)
             {
                 // чужой?  может быть выбран как цель
-                if (enemyCharacters.Contains(selCharacter) && !selCharacter.IsDead())
+                if (enemyCharacters.ContainsKey(selCharacter) && !selCharacter.IsDead())
                 {
                     // подсвечиваем
                     selCharacter.SwitchSelect(true, selectOutlineTargetColor, selectOutlineWith);
@@ -330,19 +379,21 @@ public class GameController : MonoBehaviour
 
     public bool ClickOnSelectebleCharacter(GameObject selObject)
     {
-        if (waitingPlayerInput)
+        if (!playerCharacterInfo.isEndTurn)
         {
             // персонаж?
             Character selCharacter = selObject.transform.gameObject.GetComponentInParent<Character>();
             if (selCharacter != null)
             {
                 // чужой?  может быть выбран как цель
-                if (enemyCharacters.Contains(selCharacter) && !selCharacter.IsDead())
+                if (targetList.Contains(enemyCharacters[selCharacter]) && !selCharacter.IsDead())
                 {
                     zoneSelectorTarget.HideZone();
                     // выбираем новой целью
                     SetTarget(selCharacter);
-
+                    player.Attack();
+                    playerCharacterInfo.Update(false);
+                    playerCharacterInfo.characterState = CharacterInfo.CharacterState.CharacterFire;
                     return true;
                 }
             }
@@ -361,10 +412,16 @@ public class GameController : MonoBehaviour
 
     public void MovePlayer(Vector3 point)
     {
-        if (waitingPlayerInput)
+        if (playerCharacterInfo.canMove)
         {
             player.Move(point);
-            waitingPlayerMove = true;
+            playerCharacterInfo.Update(playerCharacterInfo.canFire);
+            playerCharacterInfo.characterState = CharacterInfo.CharacterState.CharacterMove;
         }
+    }
+
+    public void CancelCharacterTurn()
+    {
+        playerCharacterInfo.EndTurn();
     }
 }

@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 
 public class MouseController : MonoBehaviour
 {
+
+    
     private NavMeshAgent navMeshAgent;
     private LineRenderer lineRenderer;
     private NavMeshPath pathNavMesh;
@@ -25,6 +27,7 @@ public class MouseController : MonoBehaviour
     private Vector3 mousePosition;
     private Vector3 oldMousePosition;
     private bool isClickDone;
+ 
 
     void Start()
     {
@@ -59,7 +62,7 @@ public class MouseController : MonoBehaviour
                     {
                         if (isObjectSelected) gameController.MoveOffSelectebleObject(selectedObject);
                         isObjectSelected = false;
-                    }
+                    } 
 
                     // кликнули
                     if (Input.GetMouseButtonDown(0))
@@ -108,8 +111,9 @@ public class MouseController : MonoBehaviour
                 else lineRenderer.positionCount = 0;
 
 
-                oldMousePosition = mousePosition;
+               
             }
+        oldMousePosition = mousePosition;
     }
 
     private bool isCursorInUI(Vector3 mouse)
