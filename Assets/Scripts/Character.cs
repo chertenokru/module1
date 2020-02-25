@@ -143,18 +143,25 @@ public class Character : MonoBehaviour, ISelectable
 
     void FixedUpdate()
     {
-        
+
         //if (navMeshAgent.velocity != Vector3.zero)
-        animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
+        
+        
         // статусы кроме анимации
         switch (state)
         {
             case State.Idle:
-                transform.rotation = startRotation;
+             //   transform.rotation = startRotation;
+             animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
                 break;
             case State.Run:
-                transform.rotation = Quaternion.LookRotation(navMeshAgent.velocity.normalized);
-                if (!navMeshAgent.hasPath && navMeshAgent.velocity == Vector3.zero) SetState(State.Idle);
+                animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
+                if ((!navMeshAgent.hasPath) ||(navMeshAgent.hasPath && navMeshAgent.remainingDistance < 0.6f && navMeshAgent.velocity.sqrMagnitude < 0.05f   ))
+                {
+                    navMeshAgent.ResetPath();
+                    SetState(State.Idle);
+                } else
+                    transform.rotation = Quaternion.LookRotation(navMeshAgent.velocity.normalized);
                 break;
 
 /*            case State.RunningToEnemy:
@@ -179,6 +186,7 @@ public class Character : MonoBehaviour, ISelectable
                 break;
  */
             case State.Shot:
+            case State.Attack:
                 if (targetCharacter != null)
                 {
                     transform.rotation = startRotation;
@@ -192,7 +200,7 @@ public class Character : MonoBehaviour, ISelectable
     /// подменяет mesh оружия и заменяет ущерб  
     private void SetWeapon(Weapons.WeaponsType value)
     {
-        //print("set weapont on");
+        
         bool stateOutline = outline.enabled;
         if (outline.enabled) outline.enabled = false;
         weaponsType = value;
@@ -266,9 +274,9 @@ public class Character : MonoBehaviour, ISelectable
         //animator setting    
         switch (state)
         {
-            case State.Run:
-                animator.SetFloat(ANIMATOR_FIELD_SPEED, 1.0f);
-                break;
+            //     case State.Run:
+               // animator.SetFloat(ANIMATOR_FIELD_SPEED, 1.0f);
+              //  break;
 
             case State.Idle:
                 animator.SetFloat(ANIMATOR_FIELD_SPEED, 0.0f);
@@ -620,8 +628,8 @@ public class Character : MonoBehaviour, ISelectable
         float dist = GetAlowedPath(point, path);
         if (dist != 0.0f)
         {
-            SetState(State.Run);
             navMeshAgent.SetPath(path);
+            SetState(State.Run);
             distanceCurrentMove -= dist;
         }
     }

@@ -84,6 +84,8 @@ MonoBehaviour:
   distanceFromEnemy: 1.2
   health: 5
   maxHealth: 5
+  distanceCurrentMove: 3
+  distanceMaxMove: 3
   danceAnimatorController: {fileID: 9100000, guid: 292b7f714ed3e4e4db5b37a359673130,
     type: 2}
 --- !u!195 &8761661358425802041
@@ -106,8 +108,8 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 1.69
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 2
+  m_WalkableMask: 5
+  m_ObstacleAvoidanceType: 4
 --- !u!1001 &7718347244896904979
 PrefabInstance:
   m_ObjectHideFlags: 0

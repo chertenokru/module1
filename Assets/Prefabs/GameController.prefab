@@ -47,7 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneSelectorPrefab: {fileID: 3151263930822314211, guid: f7860c9abbe2a1847a00f526e7db7e1b,
     type: 3}
-  selectOutlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  selectOutlinePlayerColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  selectOutlineColor: {r: 1, g: 1, b: 1, a: 1}
   selectOutlineTargetColor: {r: 1, g: 0, b: 0, a: 1}
   selectOutlineWith: 6
 --- !u!114 &5790977322928850776
