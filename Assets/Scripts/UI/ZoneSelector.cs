@@ -5,6 +5,13 @@ using UnityEngine.UIElements;
 
 public class ZoneSelector : MonoBehaviour
 {
+    public enum CharacterType
+    {
+        Player,
+        Target,
+        Enemy
+    }
+
     public GameObject moveZoneCursor;
     public GameObject attackZoneCursor;
     private Character character;
@@ -21,15 +28,18 @@ public class ZoneSelector : MonoBehaviour
         return moveZoneCursor.activeSelf;
     }
 
-    public void ShowZone(Character character)
+    public void ShowZone(CharacterType characterType, GameController.CharacterInfo characterinfo)
     {
-        transform.position = character.transform.position;
-        ;
+        Character character = characterinfo.character;
 
+        transform.position = character.transform.position;
 
         scale = moveZoneCursor.transform.localScale;
-        scale.x = character.distanceCurrentMove * 2;
-        scale.y = character.distanceCurrentMove * 2;
+        // для игрока текущию доступную на данном ходу дистануию показываем, для цели - общию 
+        scale.x =
+            ((characterType != CharacterType.Target) ? character.distanceCurrentMove : character.distanceMaxMove) * 2;
+        scale.y =
+            ((characterType != CharacterType.Target) ? character.distanceCurrentMove : character.distanceMaxMove) * 2;
         moveZoneCursor.transform.localScale = scale;
 
         scale = attackZoneCursor.transform.localScale;
@@ -38,7 +48,12 @@ public class ZoneSelector : MonoBehaviour
         attackZoneCursor.transform.localScale = scale;
 
         moveZoneCursor.SetActive(true);
-        attackZoneCursor.SetActive(true);
+        // для игрока может или нет аттаковать+наличие доступной цели,
+        // для цели - всегда дистанцию аттаки
+        if (characterType == CharacterType.Player)
+            attackZoneCursor.SetActive(characterinfo.canFire && characterinfo.hasTarget);
+        else
+            attackZoneCursor.SetActive(true);
     }
 
 

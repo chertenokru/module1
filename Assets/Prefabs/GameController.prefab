@@ -51,6 +51,9 @@ MonoBehaviour:
   selectOutlineColor: {r: 1, g: 1, b: 1, a: 1}
   selectOutlineTargetColor: {r: 1, g: 0, b: 0, a: 1}
   selectOutlineWith: 6
+  characterInfoPanelPrefab: {fileID: 269535363488086369, guid: 154a83bbf16acf7479ca8e58871a34d4,
+    type: 3}
+  damageIndicatorPrefab: {fileID: 0}
 --- !u!114 &5790977322928850776
 MonoBehaviour:
   m_ObjectHideFlags: 0

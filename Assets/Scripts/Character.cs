@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
-using JetBrains.Annotations;
-using UnityEditor.Experimental.GraphView;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -22,11 +21,17 @@ public class Character : MonoBehaviour, ISelectable
 
     public enum CharacterType
     {
+        [Description("Нет")]
         None,
+        [Description("Полицейский")]
         PoliceMan,
+        [Description("Хулиганьё")]
         Hooligan,
+        [Description("Зомби")]
         Zombie,
+        [Description("Женщина")]
         Woman,
+        [Description("Мужик")]
         Man
     }
 
@@ -152,7 +157,7 @@ public class Character : MonoBehaviour, ISelectable
         {
             case State.Idle:
              //   transform.rotation = startRotation;
-             animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
+          //   animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
                 break;
             case State.Run:
                 animator.SetFloat(ANIMATOR_FIELD_SPEED, (navMeshAgent.velocity != Vector3.zero) ? 1 : 0);
@@ -500,13 +505,18 @@ public class Character : MonoBehaviour, ISelectable
     public void SetDamageEvent()
     {
 // наносим удар и если враг мёртв, то ищем следующего
-        if (targetCharacter.SetDamage(weaponsController.GetDamage(weaponsType))) AutoSelectTarget();
+        if (targetCharacter.SetDamage(GetWeaponDamage())) AutoSelectTarget();
         // все здохли! а теперь - танцы !
         if (isWarMode && targetCharacter.state == State.Dead)
         {
             animator.avatar = null;
             animator.runtimeAnimatorController = danceAnimatorController;
         }
+    }
+
+    public int GetWeaponDamage()
+    {
+        return weaponsController.GetDamage(weaponsType);
     }
 
     public bool IsDead()
