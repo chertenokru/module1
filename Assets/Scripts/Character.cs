@@ -45,6 +45,7 @@ public class Character : MonoBehaviour, ISelectable
     private Outline outline;
     public NavMeshAgent navMeshAgent;
     public const string TAG_CHARACTER = "Character";
+    private HitEffectAnimation hitEffectAnimation;
 
 
     private State state;
@@ -99,6 +100,7 @@ public class Character : MonoBehaviour, ISelectable
         animator = GetComponentInChildren<Animator>();
         outline = GetComponentInChildren<Outline>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        hitEffectAnimation = GetComponentInChildren<HitEffectAnimation>();
     }
 
 
@@ -230,6 +232,7 @@ public class Character : MonoBehaviour, ISelectable
     // наночит урон и если труп то возвращает да
     public bool SetDamage(int damage)
     {
+        hitEffectAnimation.PlayEffect();
         if (state == State.Dead) return true;
         SetHealth(health - damage);
         if (health <= 0)
@@ -306,7 +309,7 @@ public class Character : MonoBehaviour, ISelectable
                         animator.SetTrigger(ANIMATOR_ATTACK_ARM);
                         break;
                 }
-
+                
                 break;
             case State.BeginShot:
                 if (targetCharacter.state == State.Dead)
@@ -314,6 +317,7 @@ public class Character : MonoBehaviour, ISelectable
                     startRotation = transform.rotation;
                 RotateToTarget(target.position);
                 animator.SetTrigger(ANIMATOR_SHOT);
+                
                 break;
 
             case State.Dead:
@@ -506,7 +510,9 @@ public class Character : MonoBehaviour, ISelectable
 //  а программа наносит урон
     public void SetDamageEvent()
     {
-// наносим удар и если враг мёртв, то ищем следующего
+        weaponsController.PlayWeaponFX(weaponsType);
+        
+       // наносим удар и если враг мёртв, то ищем следующего
         if (targetCharacter.SetDamage(GetWeaponDamage())) AutoSelectTarget();
         // все здохли! а теперь - танцы !
         if (isWarMode && targetCharacter.state == State.Dead)

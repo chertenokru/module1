@@ -51,4 +51,17 @@ public class WeaponsController : MonoBehaviour
 
         return 0;
     }
+
+    public void PlayWeaponFX(Weapons.WeaponsType weaponsType)
+    {
+        foreach (var weapon in Weaponses)
+        {
+            if (weapon.weaponsType == weaponsType)
+            {
+                if (weapon.hasWeaponFx) weapon.meshObject.GetComponentInChildren<WeaponFX>().Play();
+                break;
+            }
+        }
+
+    }
 }

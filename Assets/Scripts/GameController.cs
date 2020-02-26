@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class GameController : MonoBehaviour
+public partial class GameController : MonoBehaviour
 {
     public enum GameState
     {
@@ -15,55 +15,6 @@ public class GameController : MonoBehaviour
         Lose
     }
 
-
-    public class CharacterInfo
-    {
-        public enum CharacterState
-        {
-            CharacterMove,
-            CharacterFire,
-            CharacterIdle
-        }
-
-
-        public Character character;
-        public bool canMove = true;
-        public bool canFire = true;
-        public bool isEndTurn = false;
-        public bool hasTarget = false;
-        public CharacterState characterState = CharacterState.CharacterIdle;
-
-        public CharacterInfo(Character _character)
-        {
-            character = _character;
-        }
-
-        public void TurnReset()
-        {
-            canFire = true;
-            canMove = true;
-            isEndTurn = false;
-            hasTarget = false;
-
-            character.TurnReset();
-            characterState = CharacterState.CharacterIdle;
-        }
-
-        public void EndTurn()
-        {
-            canFire = false;
-            canMove = false;
-            isEndTurn = true;
-        }
-
-        public void Update(bool _canFire)
-        {
-            canFire = _canFire;
-            canMove = (character.distanceCurrentMove > 0.1f);
-        }
-    }
-
-
     public GameObject zoneSelectorPrefab;
     public Color selectOutlinePlayerColor = Color.yellow;
     public Color selectOutlineColor = Color.white;
@@ -71,7 +22,8 @@ public class GameController : MonoBehaviour
     public int selectOutlineWith = 6;
     public GameObject characterInfoPanelPrefab;
     public GameObject damageIndicatorPrefab;
-
+    
+    
     private CharacterInfoPanel characterInfoPanel;
     private Dictionary<Character, CharacterInfo> playerCharacters = new Dictionary<Character, CharacterInfo>();
     private Dictionary<Character, CharacterInfo> enemyCharacters = new Dictionary<Character, CharacterInfo>();
@@ -355,7 +307,7 @@ public class GameController : MonoBehaviour
         var obj = Instantiate(damageIndicatorPrefab);
         obj.transform.position = currentTarget.transform.position;
         obj.GetComponent<DamageIndicator>().SetDamage(-character.GetWeaponDamage());
-        Destroy(obj, 3.0f);
+        Destroy(obj, 2.0f);
     }
 
 

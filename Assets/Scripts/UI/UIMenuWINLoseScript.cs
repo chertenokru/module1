@@ -15,6 +15,8 @@ public class UIMenuWINLoseScript : MonoBehaviour
     public TextMeshProUGUI textGameResult;
     public GameObject menu;
     private SceneLoadingLogic sceneLoadingLogic;
+    private CanvasGroup canvasGroup;
+    private Animator animator;
 
     // Start is called before the first frame update
     void Awake()
@@ -24,13 +26,28 @@ public class UIMenuWINLoseScript : MonoBehaviour
         buttonExitMenu.onClick.AddListener(loadMenu);
         buttonResetLevel.onClick.AddListener(resetLevel);
         menu.SetActive(false);
+        canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 0;
+        animator = GetComponent<Animator>();
+        animator.enabled = false;
     }
 
+    public void AnimatedWindowIsStop()
+    {
+        animator.enabled = false;
+        Time.timeScale = 0.00000000000001f;
+    }
     public void ShowMenu(bool isWin)
     {
         textGameResult.text = isWin ? messageWin : messageLose;
         menu.SetActive(true);
-        Time.timeScale = 0.00000000000001f;
+        canvasGroup.alpha = 0;
+        animator.enabled = true;
+        
+
+
+
+        //Time.timeScale = 0.00000000000001f;
     }
 
     public void loadMenu()

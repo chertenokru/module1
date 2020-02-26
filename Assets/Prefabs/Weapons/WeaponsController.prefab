@@ -50,20 +50,24 @@ MonoBehaviour:
       type: 3}
     isDistanceAttack: 0
     distanceToAttack: 2
+    hasWeaponFx: 0
   - weaponsType: 1
     damage: 4
     meshObject: {fileID: 7032675071054019023, guid: e58c92feb9e2d0a47b707bc08b57cbd6,
       type: 3}
     isDistanceAttack: 1
     distanceToAttack: 6
+    hasWeaponFx: 1
   - weaponsType: 2
     damage: 2
     meshObject: {fileID: 4390538382564193114, guid: 1c85d2dce6766af478ffd3bf5ebbc34e,
       type: 3}
     isDistanceAttack: 0
     distanceToAttack: 3
+    hasWeaponFx: 0
   - weaponsType: 0
     damage: 1
     meshObject: {fileID: 0}
     isDistanceAttack: 0
     distanceToAttack: 2
+    hasWeaponFx: 0

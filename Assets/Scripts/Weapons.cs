@@ -24,5 +24,6 @@ public class Weapons
     public GameObject meshObject;
     public bool isDistanceAttack;
     public float distanceToAttack = 3f;
+    public bool hasWeaponFx;
 
 }
