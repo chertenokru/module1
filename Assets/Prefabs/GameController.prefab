@@ -53,7 +53,8 @@ MonoBehaviour:
   selectOutlineWith: 6
   characterInfoPanelPrefab: {fileID: 269535363488086369, guid: 154a83bbf16acf7479ca8e58871a34d4,
     type: 3}
-  damageIndicatorPrefab: {fileID: 0}
+  damageIndicatorPrefab: {fileID: 5592984125032548667, guid: e5e374a422c130849b20af23ba0a2b34,
+    type: 3}
 --- !u!114 &5790977322928850776
 MonoBehaviour:
   m_ObjectHideFlags: 0

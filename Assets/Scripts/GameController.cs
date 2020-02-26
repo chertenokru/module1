@@ -87,6 +87,7 @@ public class GameController : MonoBehaviour
     private GameState gameState = GameState.Game;
     private ZoneSelector zoneSelectorTarget;
     private ZoneSelector zoneSelectorPlayer;
+    private CameraMoveScript cameraMoveScript;
 
     private bool waitingPlayerInput;
     private bool waitingPlayerMove;
@@ -103,6 +104,7 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        cameraMoveScript = FindObjectOfType<CameraMoveScript>();
         foreach (Character character in FindObjectsOfType<Character>())
         {
             if (character.type == Character.CharacterType.PoliceMan)
@@ -203,6 +205,7 @@ public class GameController : MonoBehaviour
             foreach (var _player in playerCharacters)
             {
                 player = _player.Key;
+                cameraMoveScript.SetTarget(player.transform);
                 playerCharacterInfo = _player.Value;
                 FindTargetList(player, enemyCharacters, targetList);
 
@@ -239,6 +242,7 @@ public class GameController : MonoBehaviour
                         playerCharacterInfo.Update(false);
                         zoneSelectorPlayer.ShowZone(ZoneSelector.CharacterType.Player, playerCharacterInfo);
                         if (characterInfoPanel.isShow()) characterInfoPanel.Show(currentTarget);
+                       
                     }
 
                     if (player.IsIdle() &&
@@ -279,6 +283,7 @@ public class GameController : MonoBehaviour
             foreach (var _enemy in enemyCharacters)
             {
                 enemy = _enemy.Key;
+                cameraMoveScript.SetTarget(enemy.transform);
                 if (enemy.IsDead()) continue;
 
                 enemyCharacterInfo = _enemy.Value;
@@ -343,6 +348,14 @@ public class GameController : MonoBehaviour
         // ждём 3 сек и выводим окно об окончании игры
         yield return new WaitForSeconds(3.0f);
         uiMenuWinLoseScript.ShowMenu(gameState == GameState.Win);
+    }
+
+    private void CreateDamageIndicator(Character character)
+    {
+        var obj = Instantiate(damageIndicatorPrefab);
+        obj.transform.position = currentTarget.transform.position;
+        obj.GetComponent<DamageIndicator>().SetDamage(-character.GetWeaponDamage());
+        Destroy(obj, 3.0f);
     }
 
 
@@ -474,6 +487,7 @@ public class GameController : MonoBehaviour
             // выбираем новой целью
             SetTarget(agressor.character, target.character);
             agressor.character.Attack();
+            CreateDamageIndicator(agressor.character);
             agressor.Update(false);
             agressor.characterState = CharacterInfo.CharacterState.CharacterFire;
             return true;

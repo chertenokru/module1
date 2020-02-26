@@ -1396,6 +1396,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 9069452, guid: dbf89b49c5f3c4f4b924cca649a3d44b, type: 3}
+      propertyPath: fakeLoadTime
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 1695249092778903165, guid: dbf89b49c5f3c4f4b924cca649a3d44b,
         type: 3}
       propertyPath: m_Name

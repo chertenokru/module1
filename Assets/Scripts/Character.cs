@@ -318,6 +318,8 @@ public class Character : MonoBehaviour, ISelectable
 
             case State.Dead:
                 healthBar.gameObject.SetActive(false);
+                gameObject.GetComponentInChildren<Rigidbody>().useGravity = false;
+                gameObject.GetComponentInChildren<Collider>().isTrigger = true;
                 animator.SetTrigger(ANIMATOR_DEAD);
                 break;
         }
