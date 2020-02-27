@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class WeaponFX : MonoBehaviour
 {
-    private ParticleSystem particleSystem;
+    public ParticleSystem particleSystem;
     
     void Awake()
     {
-        particleSystem = GetComponent<ParticleSystem>();
+        //particleSystem = GetComponent<ParticleSystem>();
 
     }
 
