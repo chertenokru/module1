@@ -15,5 +15,6 @@ public class WeaponFX : MonoBehaviour
     public void Play()
     {
         particleSystem.Play();
+        
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -23,10 +24,12 @@ public class SceneLoadingLogic : MonoBehaviour
         public GameObject gameobject;
         public bool isCreateInMenu = false;
         public bool isCreateInLevel = true;
+        
     }
 
     public const string TAG_UI_SCENE_TO_HIDE = "HideUIOnLoad";
 
+    
     // индикатор загрузки
     public Slider progressBarSlider;
 

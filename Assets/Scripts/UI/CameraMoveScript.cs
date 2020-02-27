@@ -1,4 +1,4 @@
-﻿﻿using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,18 +7,17 @@ public class CameraMoveScript : MonoBehaviour
     private Camera camera;
 
     public float Y = 16;
-
     public float z = -10;
     public float speed = 2;
 
-    private Transform target;
+    public Transform target;
     private Vector3 targetPosition;
     
     // Start is called before the first frame update
     void Start()
     {
         camera = Camera.main;
-        target = gameObject.transform;
+       // target = new Transform();
     }
 
     // Update is called once per frame
